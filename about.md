@@ -4,6 +4,6 @@ title: Bio
 permalink: /bio/
 ---
 
-Hi, my name is Yu Ann. This blog contains my notes and writings about infosec. 
+Hi, my name is Yu Ann. This blog contains my notes and writings, mostly infosec tips. 
 
-And occasionally football.
+Thanks for visiting.
