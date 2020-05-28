@@ -1,0 +1,93 @@
+title: j4ckfruit
+author:
+  name: j4ckfruit
+  email: j4ckphruit@gmail.com
+description: > # this means to ignore newlines until "show_excerpts:"
+  notes and writings
+
+show_excerpts: false # set to true to show excerpts on the homepage
+
+tag_page_layout: tag_page
+tag_page_dir: tag
+tag_permalink_style: pretty
+
+# Minima date format
+# refer to https://shopify.github.io/liquid/filters/date/ if you want to customize this
+minima:
+  date_format: "%b %-d, %Y"
+
+  # generate social links in footer
+  social_links:
+     twitter: j4ckfruit_
+    # github:  jekyll
+    # devto: jekyll
+    # dribbble: jekyll
+    # facebook: jekyll
+    # flickr:   jekyll
+    # instagram: jekyll
+    # linkedin: jekyll
+    # pinterest: jekyll
+    # youtube: jekyll
+    # youtube_channel: UC8CXR0-3I70i1tfPg1PAE1g
+    # youtube_channel_name: CloudCannon
+    # telegram: jekyll
+    # googleplus: +jekyll
+    # microdotblog: jekyll
+    # keybase: jekyll
+
+    # Mastodon instances
+    # mastodon:
+    # - username: jekyll
+    #   instance: example.com
+    # - username: jekyll2
+    #   instance: example.com
+
+    # GitLab instances
+    # gitlab:
+    # - username: jekyll
+    #   instance: example.com
+    # - username: jekyll2
+    #   instance: example.com
+
+# If you want to link only specific pages in your header, uncomment
+# this and add the path to the pages in order as they should show up
+header_pages:
+ - about.md
+ - tags.md
+# - blog.md
+
+# Build settings
+theme: minima
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-paginate
+#  - jekyll-archives
+
+exclude:
+  - vendor
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - gulpfile.js
+  - package.json
+  - README.md
+  - yarn.lock
+
+#jekyll-archives:
+#  enabled:
+#    - year
+#    - month
+#    - tags
+#    - categories
+#  layout: 'page'
+#  layouts:
+#    year: year
+#    month: month
+#    tag: tag_and_category
+#  permalinks:
+#    year: '/:year/'
+#    month: '/:year/:month/'
+#    tag: '/tag/:name/'
+#    category: '/category/:name/'

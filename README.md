@@ -1,2 +1,1 @@
-# miniature-broccoli
-The best broccoli are miniature.
+random writings and htb write-ups under the 'j4ckfruit' moniker.
