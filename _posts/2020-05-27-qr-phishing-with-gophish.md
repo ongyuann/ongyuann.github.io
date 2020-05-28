@@ -13,12 +13,12 @@ From a technical point of view, this problem can get tricky for one very good re
 Thankfully the colleague had contacted GoPhish's authors for a solution:
 
 <img src="https://raw.githubusercontent.com/ongyuann/ongyuann.github.io/master/images/gophish_qr.jpg" alt="GoPhish actually rocks" class="inline"/>
-
+\
 It definitely seemed workable, so I got down to making the suggestions a reality. 
 
 For the remainder of this post I divide my workings according to the suggested steps:
 
-## Create a campaign, in your emails insert an image with src `http://<yourserver>/qr/{{.rid}}.jpg`
+### Create a campaign, in your emails insert an image with src `http://<yourserver>/qr/{{.rid}}.jpg`
 
 This is easy enough. Ultimately the src I used that worked for me was:
 ```
@@ -26,7 +26,7 @@ This is easy enough. Ultimately the src I used that worked for me was:
 ```
 Note: 'RId' instead of 'rid'. `/static/qr/` instead of `/qr/`. Also insert your own phishing URL and alt message.
 
-## API into the campaign grabbing all the URLs 
+### API into the campaign grabbing all the URLs 
 
 Author Note: This is to be done _after_ the campaign is launched.
 
@@ -48,7 +48,7 @@ Source: GoPhish API docs:
 https://docs.getgophish.com/api-documentation/campaigns
 ```
 
-## Foreach email use the QR library above to create `{{.rid}}.jpg`
+### Foreach email use the QR library above to create `{{.rid}}.jpg`
 
 Instead of using the QR library in the suggestion, I captured the API call to `qr-generator.qrcode.studio` when making a sample QR code, and just swapped the URL for my liking. Credit to www.qrcode-monkey.com for the awesome free service.
 
@@ -64,7 +64,7 @@ https://www.qrcode-monkey.com&size=1000&config={"body":"square","eye":"frame0","
 
 Of course, we won't be using `curl` to generate the QR images one by one - that's absurd. Ultimately we'll script the whole thing up and automate all the steps (see end of post).
 
-## Copy all the generated QR images into your server's webroot
+### Copy all the generated QR images into your server's webroot
 
 According to this [GoPhish issue](https://github.com/gophish/gophish/issues/220), static images can be stored at the `static/endpoint` directory at the GoPhish webroot. So I create a folder called `qr` in that directory and throw all our newly created QR images there. 
 
@@ -72,7 +72,7 @@ You can try throwing stuff there yourself and see if you can reach them at `http
 
 Works for you? Good. Now let's automate everything.
 
-## Automating everything:
+### Automating everything:
 ```
 #!/usr/bin/python3
 
@@ -131,3 +131,5 @@ def make_qr(rid):
 
 make_qr(rid)
 ```
+
+Do a happy dance if it worked for ya.
