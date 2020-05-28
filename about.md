@@ -4,4 +4,6 @@ title: Bio
 permalink: /bio/
 ---
 
-'j4ckfruit' is the moniker i use, infosec is the industry i'm in, and this bio is what you're reading.
+Hi, my name is Yu Ann. This blog contains my notes and writings about infosec. 
+
+And occasionally football.
