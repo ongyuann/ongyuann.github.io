@@ -1,6 +1,6 @@
 ---
 layout: default
 title: Tags
-permalink: /tag/
+permalink: /tags/
 ---
 {% include archive.html %}
