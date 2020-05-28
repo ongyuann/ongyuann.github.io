@@ -14,7 +14,7 @@ import glob
 import os
 
 post_dir = 'public/_posts/'
-tag_dir = 'public/tag/'
+tag_dir = 'public/tags/'
 
 filenames = glob.glob(post_dir + '*md')
 
