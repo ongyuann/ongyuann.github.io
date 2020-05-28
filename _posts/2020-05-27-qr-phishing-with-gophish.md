@@ -4,6 +4,8 @@ title: "QR phishing with GoPhish"
 tags: qr phishing gophish
 ---
 
+edit: created a repo for this at https://github.com/ongyuann/qr-with-gophish
+
 pre-reqs:
 
 grabbing rid from campaign '1' via API:
