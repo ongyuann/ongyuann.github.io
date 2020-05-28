@@ -251,7 +251,7 @@ Click here to logout <a href="logout.php" tite = "Logout">Session
 
 If you tried to SSH to `joanna` with just the key, you'd be asked to provide a passphrase. To get the passphrase, you can crack `joanna`'s key with _john_.
 
-First step: convert the key to john-crackable format: `python /usr/share/john/ssh2john.py joanna.key > joanna.key.hashes`
+First step: convert the key to john-crackable format: `python /usr/share/john/ssh2john.py joanna.key > joanna.key.hashes`  
 Second step: _john_ the hash: `sudo john --format=SSH joanna.key.hashes`
 
 You should get this result: `bloodninjas`
