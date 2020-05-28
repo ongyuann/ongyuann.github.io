@@ -6,7 +6,9 @@ tags: qr phishing gophish
 
 Edit: Created a [repo for this](https://github.com/ongyuann/qr-with-gophish).
 
-So recently I helped out a colleague whose client wanted to use QR codes for their phishing campaign. Problem: colleague's platform of choice, GoPhish, doesn't natively support QR code phishing.
+So recently I helped out a colleague whose client wanted to use QR codes for their phishing campaign. 
+
+Problem: colleague's platform of choice, GoPhish, doesn't natively support QR code phishing.
 
 From a technical point of view, this problem can get tricky for one very good reason: We don't want to break the platform's code.
 
@@ -15,7 +17,7 @@ Thankfully the colleague had contacted GoPhish's authors for a solution:
 <img src="https://raw.githubusercontent.com/ongyuann/ongyuann.github.io/master/images/gophish_qr.jpg" alt="GoPhish actually rocks" class="inline"/>
   
   
-It definitely seemed workable, so I got down to making the suggestions a reality. 
+It definitely seemed workable, and best part - it doesn't mess with the platform's code. So I got down to making the suggestions a reality. 
 
 For the remainder of this post I divide my workings according to the suggested steps:
 
