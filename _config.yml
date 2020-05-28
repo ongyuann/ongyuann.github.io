@@ -1,7 +1,7 @@
-title: j4ckfruit
+title: Yu Ann
 author:
-  name: j4ckfruit
-  email: j4ckphruit@gmail.com
+  name: Yu Ann
+  email: ongyuann@hotmail.com
 description: > # this means to ignore newlines until "show_excerpts:"
   notes and writings
 
@@ -18,7 +18,7 @@ minima:
 
   # generate social links in footer
   social_links:
-     twitter: j4ckfruit_
+     twitter: yu_ann10
     # github:  jekyll
     # devto: jekyll
     # dribbble: jekyll
