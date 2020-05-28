@@ -35,7 +35,7 @@ Why?
 
 The way GoPhish tracks victims is to generate a Result ID (RID) for each victim right before the email is sent out. This is done on-the-fly individually for each victim, so there's no way we can extract all RIDs and mass produce them _before_ GoPhish sends out the emails. That's why we can only mass-grab the RIDs and mass-produce the QR codes _after_ the campaign is launched.
 
-GoPhish API allows you to API into an active campaign to grab all sorts of _details_ . In these details contain the RID (i.e. Result ID), which is what we need in order to generate unique QR codes for each victim.
+GoPhish API allows you to API into an active campaign to grab all sorts of 'details'. In these details contain the RID (i.e. Result ID), which is what we need in order to generate unique QR codes for each victim.
 
 This `curl` command does exactly that, with a few manipulations to extract only the RID from the API response. 
 <sub><sup>(Disclaimer: the extraction is not perfect but does its job almost perfectly)</sup></sub>
