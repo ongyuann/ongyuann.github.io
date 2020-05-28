@@ -12,7 +12,7 @@ From a technical point of view, this problem can get tricky for one very good re
 
 Thankfully the colleague had contacted GoPhish's authors for solution:
 
-<img src="images/gophish_qr.jpg" alt="can i say how much i appreciate gophish?" class="inline"/>
+<img src="../images/gophish_qr.jpg" alt="GoPhish actually rocks" class="inline"/>
 
 It definitely seemed workable, so I got down to making the suggestions a reality. 
 
@@ -26,9 +26,13 @@ This is easy enough. Ultimately the src I used that worked for me was:
 ```
 Note: 'RId' instead of 'rid'. `/static/qr/` instead of `/qr/`. Also insert your own phishing URL and alt message.
 
-## API into the campaign grabbing all the URLs (author note: _after_ the campaign is launched)
+## API into the campaign grabbing all the URLs 
 
-Before we go into the details, the way GoPhish tracks victims is to generate a Result ID (RID) for each victim right before the email is sent out. This is done on-the-fly individually for each victim, so there's no way we can extract all RIDs and mass produce them _before_ GoPhish sends out the emails. That's why we can only mass-grab the RIDs and mass-produce the QR codes _after_ the campaign is launched.
+Author Note: This is to be done _after_ the campaign is launched.
+
+Why?
+
+The way GoPhish tracks victims is to generate a Result ID (RID) for each victim right before the email is sent out. This is done on-the-fly individually for each victim, so there's no way we can extract all RIDs and mass produce them _before_ GoPhish sends out the emails. That's why we can only mass-grab the RIDs and mass-produce the QR codes _after_ the campaign is launched.
 
 GoPhish API allows you to API into an active campaign to grab all sorts of _details_ . In these details contain the RID (i.e. Result ID), which is what we need in order to generate unique QR codes for each victim.
 
