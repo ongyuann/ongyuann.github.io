@@ -4,7 +4,7 @@ title: "HTB: Obscurity"
 tags: htb
 ---
 
-Obscurity was a super fun box that involved simple reversing and some understanding of cryptography. When I first did this box I admit I felt intimidated by the thought of having to do some reversing, but just like all (most) HTB boxes, when you persist and reach the end, you get a super rewarding (and fun!) experience.
+Obscurity was a super fun box that involved simple reversing and some understanding of cryptography. When I first did this box, I felt intimidated by the thought of having to do some reversing. But just like all (most) HTB boxes, when you persist and reach the end, you get a super rewarding (and fun!) experience.
 
 ### Recce
 
