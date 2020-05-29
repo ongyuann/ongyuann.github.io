@@ -12,7 +12,7 @@ If you did a regular nmap scan (with `-sC -sV`), you should see open ports 22 an
 
 ### Port 8080
 
-Immediately you see a web-page talking about "0bscura", and some text along the page that I personally felt was sarcasm towards the the concept of "security through obscurity". 
+Visit port 8080 and you see a web-page talking about "0bscura", and some text along the page that I personally felt was sarcasm towards the the concept of "security through obscurity". 
 
 All fun and good, but if you scroll to the bottom, you should see some juicy information:
 
