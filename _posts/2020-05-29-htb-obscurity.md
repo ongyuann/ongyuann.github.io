@@ -234,7 +234,7 @@ No need to panic yet, as always the most interesting places to look in a source 
 # This is how you do string formatting, right?
 ```
 
-Dangerous functions:
+Dangerous functions (`exec`):
 ```
 exec(info.format(path))
 ```
