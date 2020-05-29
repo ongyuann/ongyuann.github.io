@@ -241,7 +241,9 @@ exec(info.format(path))
 
 So the clues we have are that the author probably didn't implement string formatting correctly on Python, and if we could exploit the improperly-implemented string formatting, we can pass our commands to the `exec` function which can execute system commands, essentially allowing us remote code execution capabilities.
 
-Let's study how we can exploit the supposedly poorly-formatted string formatting. To do this, we can make our own Python script where we imitate the way that user input is received into `SuperSecureServer.py` by using the same `urllib.parse` function that `SuperSecureServer.py` is using, then parsing that input in the exact same way. (FYI, note that the user input in this case is the URL that is entered into `SuperSecureServer.py`).
+Let's study how we can exploit the supposedly poorly-formatted string formatting. To do this, we can make our own Python script where we imitate the way that user input is received into `SuperSecureServer.py` by using the same `urllib.parse` function that `SuperSecureServer.py` is using, then parsing that input in the exact same way.  
+(FYI, note that the user input in this case is the URL that's entered into `SuperSecureServer.py`).
+
 ```python
 kali@kali:~$ cat test.py 
 #!/usr/bin/python3
