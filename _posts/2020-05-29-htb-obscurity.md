@@ -48,13 +48,10 @@ GENERATED WORDS: 4616
 + http://obscurity.htb:8080/develop/SuperSecureServer.py (CODE:200|SIZE:5892) 
 ```
 
-We find a file at `/develop/SuperSecureServer.py`.
+We find a file at `/develop/SuperSecureServer.py`, which is a Python program, and that looks like it's the very source code on which the server on port 8080 runs on.
 
 ### Reversing `SuperSecureServer.py` for RCE
-
-At `http://obscurity.htb:8080/develop/SuperSecureServer.py`, you see a Python program that looks like it's the very source code on which the server on port 8080 runs on.
-
-If at this point you wish there was an alternative to understanding the Python code in order to get a foothold on the box, you're out of luck.
+If at this point you wish there was an alternative to understanding the Python code in order to get a foothold on the box, you're out of luck ;)
 
 Let's take a look at the code:
 ```python
