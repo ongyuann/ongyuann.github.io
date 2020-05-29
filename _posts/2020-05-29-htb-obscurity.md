@@ -24,7 +24,7 @@ We don't know what entails a `secret development directory` (which could've help
 
 To find the file we want on the site, we can use the 'extensions' option available on most dirbusting programs to search for paths ending in `/SuperSecureServer.py` - after all, when searching for specific extensions / filetypes, the dirbusting program is simply adding a suffix to the path that it's examining, so in the same vein, we turn that suffix into `/SuperSecureServer.py` to find the file we want.
 
-On most dirbusting programs, the 'extensions' option is usually invoked with `-e` or `-X`. With `dirb`, it's invoked with `-X`, and though slow, the good thing about using `dirb` is that it automatically forces your defined extensions on every entry of the wordlist it's using (other busters like `gobuster` and `dirsearch` requires you to have to 'force' it).
+On most dirbusting programs, the 'extensions' option is invoked with `-e` or `-X`. With `dirb`, it's invoked with `-X`, and though slow, the good thing about using `dirb` is that it automatically forces your defined extensions on every entry of the wordlist it's using (other busters like `gobuster` and `dirsearch` requires you to have to 'force' it).
 
 So we do that with the `/usr/share/wordlist/dirb/common.txt` wordlist, and immediately we find a sensible result:
 ```console
