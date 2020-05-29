@@ -8,7 +8,7 @@ Obscurity was a super fun box that involved simple reversing and some understand
 
 ### Recce
 
-If you did a regular nmap scan (with `-sC -sV`), you should see open ports 22 and 8080, and some closed ports at 80 and 9000. Immediately you should see that port 8080 is the more interesting one - simply cos it's got more results from the nmap scan.
+If you did a regular nmap scan (with `-sC -sV`), you should see open ports 22 and 8080, and some closed ports at 80 and 9000. Immediately you should see that port 8080 is the more interesting one - simply because it's got more results from the nmap scan.
 
 ### Port 8080
 
