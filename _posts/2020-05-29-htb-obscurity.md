@@ -534,9 +534,9 @@ parser.add_argument('-k',
 parser.add_argument('-d', action='store_true', help='Decrypt mode')
 ```
 In words,
-- `-i` --> the *filename* that contains our `text` --> `out.txt`
+- `-i` --> the filename that contains our `text` --> `out.txt`
 - `-o` --> the filename to write our output --> let's go with `key.txt`
-- `-k` --> the *string* that represents our `key` --> the *contents* of `check.txt`
+- `-k` --> the string that represents our `key` --> the contents of `check.txt`
 - `-d` --> activates 'Decrypt mode' --> since we need to `decrypt`, we need to include `-d`
   
 Now let's put this in action:
