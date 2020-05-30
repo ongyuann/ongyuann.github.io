@@ -4,11 +4,11 @@ title: "HTB: Obscurity"
 tags: htb
 ---
 
-Obscurity was a super fun box that involved simple reversing and some understanding of cryptography. When I first did this box, I felt intimidated by the thought of having to do reversing. But just like all (most) HTB boxes, when you persist and reach the end, you get a super rewarding (and fun!) experience.
+Obscurity was a fun box that involved simple reversing and some understanding of cryptography. When I first did this box, I felt intimidated by the thought of having to do reversing. But just like all (most) HTB boxes, when you persist and reach the end, you get a super rewarding (and fun!) experience!
 
 ### Recce
 
-If you did a regular nmap scan (with `-sC -sV`), you should see open ports 22 and 8080, and some closed ports at 80 and 9000. Immediately you should see that port 8080 is the more interesting one - simply because it's got more results from the nmap scan.
+If you do a regular nmap scan (with `-sC -sV`), you should see open ports 22 and 8080, and some closed ports at 80 and 9000. You should see that port 8080 is the more interesting one - simply because it's got more results from the nmap scan.
 
 ### Port 8080
 
