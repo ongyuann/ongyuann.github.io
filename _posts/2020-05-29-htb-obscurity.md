@@ -577,7 +577,7 @@ And now we have `robert`'s password: `SecThruObsFTW`!
 
 Login as robert:
 ```
-sshpass -p "SecThruObsFTW" ssh robert@obscurity.htb
+kali@kali:~$ sshpass -p "SecThruObsFTW" ssh robert@obscurity.htb
 Welcome to Ubuntu 18.04.3 LTS (GNU/Linux 4.15.0-65-generic x86_64)
 
 (..snip..)
