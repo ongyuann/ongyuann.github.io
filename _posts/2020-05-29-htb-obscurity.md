@@ -504,9 +504,9 @@ and c - b = a,
 then c - a = b
 ```
 In words:  
-If `text` encrypted with `key` = `encrypted`,
-and `encrypted` decrypted with `key` = `text`,
-then `encrypted` decrypted with `decrypted` = `key`.
+- If `text` encrypted with `key` = `encrypted`,
+- and `encrypted` decrypted with `key` = `text`,
+- then `encrypted` decrypted with `decrypted` = `key`.
 
 We have our `text` (`check.txt`), and we have our `encrypted` (`out.txt`) - we can absolutely do this. But before we do it, let's take a look at the program's arguments (i.e. how it accepts input):
 ```
