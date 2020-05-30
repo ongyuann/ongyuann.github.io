@@ -241,9 +241,9 @@ exec(info.format(path))
 
 These clues indicate that the author didn't implement string formatting correctly on Python - and if we could exploit the improperly-implemented string formatting, we can achieve remote code execution by passing our commands to the dangerous `exec` function. ([Here's a pretty good article that explains the dangers of certain Python functions.](https://www.kevinlondon.com/2015/07/26/dangerous-python-functions.html))
 
-Let's study how we can exploit the supposedly poorly-formatted string formatting. To do this, we can make our own Python script where we imitate the way that user input is received into `SuperSecureServer.py` by using the same `urllib.parse` function that `SuperSecureServer.py` is using, then parsing that input in the exact same way.  
-(FYI, note that the user input in this case is the URL that's entered into `SuperSecureServer.py`).
-
+Let's study how we can exploit the supposedly poorly-formatted string formatting. To do this, we can make our own Python script where we imitate the way that user input is received into `SuperSecureServer.py` by using the same `urllib.parse` function that `SuperSecureServer.py` is using, then parsing that input in the exact same way.  (FYI, the user input in this case is the URL that's entered into `SuperSecureServer.py`).
+  
+Our `test.py`:
 ```python
 kali@kali:~$ cat test.py 
 #!/usr/bin/python3
@@ -279,7 +279,7 @@ output = 'Document: wow'
 ```
 Attempted payload: `wow`  
 Entering `wow` does no harm, but we do see how our input is inserted into the prepared statement. We should notice that if we had inserted a `'` before `wow`, we could close the prepared statement and potentially insert our own commands, just like how all injections typically work.
-
+  
 ```
 kali@kali:~$ ./test.py "%40"
 [+] exec (info.format(path))
@@ -289,7 +289,7 @@ output = 'Document: @'
 ```
 Attempted payload: `%40`  
 Entering `%40`, we see that our input is URL-decoded into `@`. This is caused by the `urllib.parse` function, which automatically URL-decodes user input. Why are we testing this? That's because most command injections through web-applications use URL encoding to bypass restrictions, so now that we've confirmed this transformation in the source code, maybe we could use this to our advantage (and ultimately, we do!). 
-
+  
 ```
 kali@kali:~$ ./test.py "wow';print (%27a%27)"
 [+] exec (info.format(path))
@@ -308,7 +308,7 @@ Attempted payload: `wow';print (%27a%27)`
 Here we've attempted a mini command injection by entering `wow';print (%27a%27)`. URL decoded, this becomes `wow';print ('a')` - see here that we've immediately capitalized on URL encoding to smuggle `'` characters into the user input, where such characters could have broken the statement prematurely (actually it doesn't, but still good practice ˙ ͜ʟ˙).
 
 However, we see that there's a `SyntaxError` caused by a mistake I'd made here - I'd forgotten to take care if the trailing `'` at the end of the prepared statement. So in our next try, let's take care of it by adding another `'` at the end of our input to pair up with the trailing `'` and close the loop. Note that to add this `'`, we need to first add a `;` before to close our injected command -> `;'`.
-
+  
 ```
 kali@kali:~$ ./test.py "wow';print (%27a%27);'"
 [+] exec (info.format(path))
