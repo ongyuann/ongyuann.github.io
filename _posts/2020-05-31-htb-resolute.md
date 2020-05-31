@@ -321,7 +321,7 @@ index: 0x10a9 RID: 0x457 acb: 0x00000210 Account: marko	Name: Marko Novak	Desc: 
 This tells us that new accounts have their default password set to `Welcome123!` - if we tried this with `Marko Novak`'s account, we'll see that it didn't work. So maybe Marko was diligent enough to change away his default password - but what if others weren't so diligent? Let's try it on all the user accounts we discovered.
   
   
-First, we can gather all user accounts from our `enum4linux` output and store them in a file (e.g. `users.txt`) via a simple bash command (here I've stored my output in a file called `initial.txt`):
+First, we can gather all user accounts from our `enum4linux` output and store them in a file (e.g. `users.txt`) via a simple bash command (here I'd stored my `enum4linux` output in a file called `initial.txt`):
 ```
 kali@kali:~$ cat initial.txt | grep "user:" | cut -d"[" -f 2 | cut -d "]" -f 1 > users.txt
 ```
