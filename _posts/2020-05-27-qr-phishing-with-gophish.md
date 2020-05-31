@@ -65,7 +65,7 @@ Decoded 'data' field (for reference):
 https://www.qrcode-monkey.com&size=1000&config={"body":"square","eye":"frame0","eyeBall":"ball0","erf1":[],"erf2":[],"erf3":[],"brf1":[],"brf2":[],"brf3":[],"bodyColor":"#000000","bgColor":"#FFFFFF","eye1Color":"#000000","eye2Color":"#000000","eye3Color":"#000000","eyeBall1Color":"#000000","eyeBall2Color":"#000000","eyeBall3Color":"#000000","gradientColor1":"","gradientColor2":"","gradientType":"linear","gradientOnEyes":"true","logo":"","logoMode":"default"}
 ```
 
-Of course, we won't be using `curl` to generate the QR images one by one - that's absurd. Ultimately we'll script the whole thing up and automate all the steps (see end of post).
+Of course, we won't be using `curl` to generate the QR images one by one - that's inefficient. Ultimately we'll script the whole thing up and automate all the steps (see end of post).
 
 ### Copy all the generated QR images into your server's webroot
 
@@ -76,7 +76,7 @@ You can try throwing stuff there yourself and see if you can reach them at `http
 Works for you? Good. Now let's automate everything.
 
 ### Automating everything:
-```
+```python
 #!/usr/bin/python3
 
 import requests
@@ -135,4 +135,4 @@ def make_qr(rid):
 make_qr(rid)
 ```
 
-Do a happy dance if it worked for ya.
+Hope it worked for ya.
