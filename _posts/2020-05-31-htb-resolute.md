@@ -313,7 +313,7 @@ Key information:
 - We've got a list of user accounts,
 - We're given a glimpse of some local groups - the `Remote Management Users` group indicates that we could open a Windows Remote Management shell if we have the right credentials.
 
-Most importantly, we've also given a big clue:
+Most importantly, we're also given a big clue:
 ```
 index: 0x10a9 RID: 0x457 acb: 0x00000210 Account: marko	Name: Marko Novak	Desc: Account created. Password set to Welcome123!
 ```
