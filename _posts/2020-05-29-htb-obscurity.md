@@ -27,7 +27,7 @@ To find the file we want on the site, we can use the 'extensions' option availab
 On most dirbusting programs, the 'extensions' option is invoked with `-e` or `-X`. With `dirb`, it's invoked with `-X`, and though slow, the good thing about using `dirb` is that it automatically forces your defined extensions on every entry of the wordlist it's using (other busters like `gobuster` and `dirsearch` require you to have to 'force' it).
 
 So we do that with the `/usr/share/wordlist/dirb/common.txt` wordlist, and immediately we find a sensible result:
-```console
+```
 kali@kali:~$ dirb http://obscurity.htb:8080 ./common.txt -o initial.txt -X /SuperSecureServer.py
 -----------------
 DIRB v2.22    
