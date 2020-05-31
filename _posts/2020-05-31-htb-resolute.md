@@ -437,7 +437,7 @@ Info: Establishing connection to remote endpoint
 ```
 Grab user.txt here from `melanie`'s Desktop.
 
-### Priv: melanie --> ryan
+### Priv: melanie -> ryan
 At this stage, you could run the awesome [winpeas.exe binary](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) to run some standard enumeration, or you could be like me and just go around looking for interesting stuff. 
   
   
