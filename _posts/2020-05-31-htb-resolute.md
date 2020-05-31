@@ -436,7 +436,7 @@ Info: Establishing connection to remote endpoint
 Grab user hash from `melanie`'s Desktop.
 
 ### Priv: melanie -> ryan
-At this stage, you could run the awesome [winpeas.exe binary](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) to run some standard enumeration, or you could be like me and just go around looking for interesting stuff. 
+At this stage, you could run the awesome [winpeas.exe binary](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) to do some standard enumeration, or you could be like me and just go around looking for interesting stuff. 
   
   
 If you did the latter, eventually you would come across the `PSTranscripts` folder, which is sort of like the PowerShell equivalent of `.bash_history`. This folder is usually hidden in the `C:\` directory, and is only visible if you force it to show with a `-Force` option:
