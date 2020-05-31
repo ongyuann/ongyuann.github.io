@@ -311,7 +311,7 @@ enum4linux complete on Fri Feb 28 12:40:27 2020
 Key information:
 - Domain is `MEGABANK`,
 - We've got a list of user accounts,
-- We've given a glimpse of some local groups - the `Remote Management Users` group indicates that we could open a Windows Remote Management shell if we have the right credentials.
+- We're given a glimpse of some local groups - the `Remote Management Users` group indicates that we could open a Windows Remote Management shell if we have the right credentials.
 
 Most importantly, we've also given a big clue:
 ```
