@@ -692,7 +692,7 @@ Impacket v0.9.21.dev1+20200225.153700.afe746d2 - Copyright 2020 SecureAuth Corpo
 [*] Config file parsed
 [*] Config file parsed
 ```
-(Note that the syntax for `smbserver` is: `smbserver.py <name of share you want to set> <name of folder you want to share>`
+(The syntax for `smbserver` is: `smbserver.py <name of share to be decided by you> <name of folder you want to share>`)
   
   
 Then, setup a netcat listener on your attacking machine:
