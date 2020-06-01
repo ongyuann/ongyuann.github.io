@@ -123,7 +123,7 @@ Last login: Thu May 28 07:38:30 2020 from 10.10.14.12
 jimmy@openadmin:~$ 
 ```
 
-That worked, and we got `jimmy`.
+That worked, and we got `jimmy`. (But not user.txt - that's in `joanna`'s home directory).
 
 ### Priv: jimmy -> joanna
 At this point the standard thing to do is to run an enumeration script again, since results might be different if we have `jimmy`'s permissions. Speaking of which, let's take a look at `jimmy`'s permissions:
@@ -270,6 +270,7 @@ Failed to connect to https://changelogs.ubuntu.com/meta-release-lts. Check your 
 Last login: Thu Jan  2 21:12:40 2020 from 10.10.14.3
 joanna@openadmin:~$ 
 ```
+Grab user hash here.
 
 #### 2. Edit `main.php` to give us `joanna` shell.
 
@@ -309,6 +310,7 @@ connect to [10.10.14.64] from (UNKNOWN) [10.10.10.171] 35260
 $ id
 uid=1001(joanna) gid=1001(joanna) groups=1001(joanna),1002(internal)
 ```
+Grab user hash here.
 
 ### Priv: joanna -> root
 Turns out, `joanna` can `sudo`, albeit restrictively:
