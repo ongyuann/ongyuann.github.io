@@ -28,7 +28,7 @@ On most dirbusting programs, the 'extensions' option is invoked with `-e` or `-X
 
 So we do that with the `/usr/share/wordlist/dirb/common.txt` wordlist, and immediately we find a sensible result:
 ```
-kali@kali:~$ dirb http://obscurity.htb:8080 ./common.txt -o initial.txt -X /SuperSecureServer.py
+kali@kali:~$ dirb http://obscurity.htb:8080 /usr/share/wordlist/dirb/common.txt -o initial.txt -X /SuperSecureServer.py
 -----------------
 DIRB v2.22    
 By The Dark Raver
