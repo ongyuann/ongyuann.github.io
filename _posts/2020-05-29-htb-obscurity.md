@@ -761,7 +761,7 @@ So what we now have here is a race with `BetterSSH.py`: we need to grab the copy
 
 Can we do that? Absolutely! 
 
-First, let's create a perpetual loop that would constantly copy everything from `/tmp/SSH/` to a convenient directory of our choosing, say `/home/robert/net`. (Because this loop is the net' that will catch our 'fish' ;))
+First, let's create a perpetual loop that would constantly copy everything from `/tmp/SSH/` to a convenient directory of our choosing, say `/home/robert/net`. (Because this loop is the 'net' that will catch our 'fish' ;))
 
 Our 'net' will look like this: `while true;do cp -r /tmp/SSH /home/robert/net;done &` (FYI, the `&` at the end of the command backgrounds our command):
 ```
