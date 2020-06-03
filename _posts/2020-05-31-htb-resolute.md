@@ -4,6 +4,8 @@ title: "HTB: Resolute"
 tags: htb windows
 ---
 
+Edit: [Learn much much more with IppSec in his video on this box](https://www.youtube.com/watch?v=8KJebvmd1Fk), especially with regards to a more proper way of executing the privilege escalation with regards to real-world environment.
+
 Resolute was the first active Windows box I ever rooted on HTB. Solving this box involved abusing weak / lazy configurations to get user shell and then exploiting a vulnerability related to [abusing permissions granted to "DNSAdmins" groups in an AD environment](http://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) to get root. I honestly didn't know much about this "DNSAdmin" exploit until I did this box, so let's re-explore together :)
 
 ### Recce
