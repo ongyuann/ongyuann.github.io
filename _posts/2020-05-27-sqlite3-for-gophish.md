@@ -9,3 +9,8 @@ source: `https://stackoverflow.com/questions/13514509/search-sqlite-database-all
 ```
 for X in $(sqlite3 database.db .tables) ; do sqlite3 database.db "SELECT * FROM $X;" | grep >/dev/null 'STRING I WANT' && echo $X; done
 ```
+
+checking columns in sqlite3:
+```
+pragma table_info(table-name);
+```
