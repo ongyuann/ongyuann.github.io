@@ -435,7 +435,7 @@ kali@kali:~/htb/boxes/monteverde/enum4linux$ cat azure.xml
   </Obj>
 </Objs>
 ```
-All right! Looks like we got `mhope`'s credentials. That wasn't so hard was it???
+All right! Looks like we got `mhope`'s credentials. That wasn't so hard was it??? Let's keep going.
 
-###Shell as mhope
+### Shell as mhope
 
