@@ -51,7 +51,7 @@ We observe the following:
 - there's SMB (445/139), Kerberos (88) and LDAP (3268).
   
   
-As is the case with Windows boxes I'll usually start with SMB to try to find accessible shares and some usernames. My go-to tool is usually `enum4linux`, so let's see the output:
+As is usually the case with Windows boxes I'll start with SMB and try to find accessible shares and some usernames. My go-to tool is usually `enum4linux`, so let's see the output:
 ```
 Starting enum4linux v0.8.9 ( http://labs.portcullis.co.uk/application/enum4linux/ ) on Tue Mar 10 10:48:31 2020
 
