@@ -104,7 +104,7 @@ auth_header = {'Authorization':ur_api_token}
 local_url = http_or_https + '://127.0.0.1:3333/api/campaigns/' + campaign_id + "/results"
 
 try:
-    r = requests.get(local_url,headers=auth_header)
+    r = requests.get(local_url,headers=auth_header,verify=False)
 except:
     print ("[!] something went wrong - we can't connect to your gophish API. check if you can connect to API manually and troubleshoot:\n[+] curl localhost:3333/api/campaigns/" + campaign_id + "/results -H 'Authorization: " + ur_api_token + "' | grep 'id' | grep -v 'campaign' | cut -d':' -f2 | cut -d'\"' -f2")
     sys.exit()
@@ -134,9 +134,12 @@ rid = grep_rid(r) #array of rids from chosen campaign
 
 def make_qr(rid):
     qr_dir = gophish_webroot + static_images_dir
+    print ('[+] checking if static images directory exists')
     if not os.path.exists(qr_dir):
+        print ('[+] creating static images directory for qr code')
         os.makedirs(qr_dir)
     else:
+        print ('[+] removing old qr codes from static images directory')
         os.system('rm ' + qr_dir + '*')
 
     for i in rid:
