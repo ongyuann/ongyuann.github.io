@@ -28,7 +28,9 @@ This is easy enough. Ultimately the src I used that worked for me was:
 <img src="http://<ur_phishing_site>/static/qr/{{.RId}}.png" alt="it works!" width="500" height="500">
 ```
 Note! There's a {{.RId}} before `.png`.
-Note: 'RId' instead of 'rid'. `/static/qr/` instead of `/qr/`. Also insert your own phishing URL and alt message.
+  
+  
+Note also: 'RId' instead of 'rid'. `/static/qr/` instead of `/qr/`. Also insert your own phishing URL and alt message.
 
 ### API into the campaign grabbing all the URLs 
 
