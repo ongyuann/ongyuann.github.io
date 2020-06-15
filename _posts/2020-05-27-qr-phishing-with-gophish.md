@@ -106,7 +106,7 @@ local_url = http_or_https + '://127.0.0.1:3333/api/campaigns/' + campaign_id + "
 try:
     r = requests.get(local_url,headers=auth_header)
 except:
-    print ("[!] something went wrong - we can't connect to your gophish API. check if you can connect to API manually and troubleshoot:\n[+] curl localhost:3333/api/campaigns/" + campaign_id + "/results -H 'Authorization: " + ur_api_token + " | grep 'id' | grep -v 'campaign' | cut -d':' -f2 | cut -d'\"' -f2")
+    print ("[!] something went wrong - we can't connect to your gophish API. check if you can connect to API manually and troubleshoot:\n[+] curl localhost:3333/api/campaigns/" + campaign_id + "/results -H 'Authorization: "' + ur_api_token + " | grep 'id' | grep -v 'campaign' | cut -d':' -f2 | cut -d'\"' -f2")
     sys.exit()
 
 if "Invalid" in r.text:
