@@ -80,18 +80,38 @@ Works for you? Good. Now let's automate everything.
 #!/usr/bin/python3
 
 import requests
-import os
+import os,sys
 
+######################
+## things to change ##
+######################
 campaign_id = '12' #change this - take from campaign url
-phishing_url = 'http://<ur_phishing_site>/?rid=' #change to landing page url
+phishing_url = 'http://j4ck1e.xyz/?rid=' #change to landing page url (don't touch the '?rid='!)
+ur_api_token = '489de2cc780b60779cbc984f9aa42327416dfac0899b49e29c4882d19c479ae0' # change this - take from gophish account page
 
+#####################
+## things to check ##
+#####################
 gophish_webroot = '/home/ubuntu/go/src/github.com/gophish/gophish' #check this - make sure it's right
+http_or_https = 'http' #check! if gophish mgmt instance is on HTTPS, change to 'https'
+
+####################
+## all systems go ##
+####################
 static_images_dir = '/static/endpoint/qr/'
 
-auth_header = {'Authorization':'<ur_api_token>'} #check this - take from gophish account page
-local_url = 'http://127.0.0.1:3333/api/campaigns/' + campaign_id + "/results"
+auth_header = {'Authorization':ur_api_token}
+local_url = http_or_https + '://127.0.0.1:3333/api/campaigns/' + campaign_id + "/results"
 
-r = requests.get(local_url,headers=auth_header)
+try:
+    r = requests.get(local_url,headers=auth_header)
+except:
+    print ("[!] something went wrong - we can't connect to your gophish API. check if you can connect to API manually and troubleshoot:\n[+] curl localhost:3333/api/campaigns/" + campaign_id + "/results -H 'Authorization: " + ur_api_token + " | grep 'id' | grep -v 'campaign' | cut -d':' -f2 | cut -d'\"' -f2")
+    sys.exit()
+
+if "Invalid" in r.text:
+    print ("[!] something went wrong - gophish rejected your API key. is this API key correct?\n[+] " + ur_api_token)
+    sys.exit()
 
 def grep_rid(r):
     rid = []
@@ -116,10 +136,8 @@ def make_qr(rid):
     qr_dir = gophish_webroot + static_images_dir
     if not os.path.exists(qr_dir):
         os.makedirs(qr_dir)
-        print ('[+] created qr directory at ' + qr_dir)
     else:
-        os.system('rm ' + qr_dir + '*') #comment this if running multiple qr-code campaigns simultaneously
-        print ('[+] cleared files at ' + qr_dir) #this too
+        os.system('rm ' + qr_dir + '*')
 
     for i in rid:
         qr_file = qr_dir + i + '.png'
