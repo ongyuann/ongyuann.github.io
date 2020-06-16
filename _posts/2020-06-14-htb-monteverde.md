@@ -285,7 +285,7 @@ enum4linux complete on Tue Mar 10 10:59:08 2020
 
 Awesome - so we find a few usernames. Let's store the `enum4linux` results in a file called `enum.txt` and collect the usernames with this command:
 ```
-kali@kali:~/htb/boxes/monteverde/enum4linux$ cat enum.txt | grep member | grep MEGABANK | cut -d'\' -f2 > users.txt
+cat enum.txt | grep member | grep MEGABANK | cut -d'\' -f2 > users.txt
 ```
 ```
 Guest
