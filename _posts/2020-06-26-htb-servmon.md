@@ -314,8 +314,7 @@ Now we need to add running our `evil.bat` script to the scheduler on `NSClient++
 ```
 sshpass -p 'L1k3B1gBut7s@W0rk' ssh -N -L 4444:127.0.0.1:8443 nadine@servmon.htb
 ```
-This sets up our local port `4444` to be forwarded to `127.0.0.1:8443` at `servmon.htb`, which means we can access `NSClient++` as a 'local' user on our kali at `https://localhost:4444`:
-<picture>
+This sets up our local port `4444` to be forwarded to `127.0.0.1:8443` at `servmon.htb`, which means we can access `NSClient++` as a 'local' user on our kali at `https://localhost:4444`.
   
   
 Things are painfully slow at this stage and you might need to redo the entire privesc process repeatedly. For reference, these are the general steps:
