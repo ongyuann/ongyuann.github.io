@@ -320,10 +320,10 @@ This sets up our local port `4444` to be forwarded to `127.0.0.1:8443` at `servm
   
 Things are painfully slow at this stage and you might need to redo the entire privesc process repeatedly. For reference, these are the general steps:
 
-1. Activate scheduler and external scripts via API
-2. Settings > external scripts > scripts > /evil + "command" : "c:\temp\evil.bat"
-3. Settings > scheduler > schedules > /evil + "command" : "evil"
-4. Settings > scheduler > schedules > /evil + "interval" : "1m"
+- 1. Activate scheduler and external scripts via API
+- 2. Settings > external scripts > scripts > /evil + "command" : "c:\temp\evil.bat"
+- 3. Settings > scheduler > schedules > /evil + "command" : "evil"
+- 4. Settings > scheduler > schedules > /evil + "interval" : "1m"
   
   
 If you managed to get it all set up, listen on port 443:
