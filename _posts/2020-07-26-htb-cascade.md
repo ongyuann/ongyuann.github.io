@@ -252,7 +252,7 @@ msf5 > irb
 >> Rex::Proto::RFB::Cipher.decrypt ["6bcf2a4b6e5aca0f"].pack('H*'), fixedkey
 => "sT333ve2"
 ```
-Recall that the `VNC Install.reg` file was in the `IT/Temp/s.smith` folder, so it probably belongs to `s.smith`, which would be mean we've got `s.smith`'s password :)
+Recall that the `VNC Install.reg` file was in the `IT/Temp/s.smith` folder, so it probably belongs to `s.smith`, which would imply that we've got `s.smith`'s password :)
 
 ### Shell as s.smith
 Check `enum4linux` output for `s.smith` and see that `s.smith` belongs to the `Remote Management Users` group:
