@@ -446,7 +446,9 @@ Take a look inside `CascCrypto.dll` and see that the `DecryptString` function is
 ```
 Seems like a lot to take in, but now we've got all that we need to decrypt `ArkSvc`'s password! Let's write some makeshift `C#` code (we knew it was `C#` because the main file was called `MainModule.cs`!) to make use of the code we found! My hack attempt:
 ```
-cat decrypt.cs 
+$ cat decrypt.cs 
+```
+```cpp
 using System;
 //using CascCrypto;
 using System.IO;
@@ -499,7 +501,7 @@ Thank you for the welcome :)
 ### Shell as ArkSvc
 See that the `ArkSvc` user is also part of the `Remote Management Users` group so we can login:
 ```
-cat initial.txt | grep -i "remote"
+$ cat initial.txt | grep -i "remote"
 group:[Remote Desktop Users] rid:[0x22b]
 group:[WinRMRemoteWMIUsers__] rid:[0x465]
 group:[Remote Management Users] rid:[0x466]
