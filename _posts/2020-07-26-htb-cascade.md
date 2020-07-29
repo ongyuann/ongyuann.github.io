@@ -390,7 +390,7 @@ We find in the `Ldap` table what looks like encrypted credentials for the `ArkSv
 ### Reversing CascAudit.exe and CascCrypto.dll for fun and profit
 Unfortunately, from here we have to use Windows a little (at least I did). First, we install [JetBrain's free DotPeek decompiler](https://www.jetbrains.com/decompiler/) in order to decompile `CascAudit.exe`. Once that's done, use `DotPeek` to open `CascAudit.exe` and navigate to `CascAudit` > `CascAudiot` > `MainModule` > `Main():void` like this:
 
-<insert image>
+<img src="https://raw.githubusercontent.com/ongyuann/ongyuann.github.io/master/images/2020-07-26-cascade-code.png" alt="inconvenient but cool" class="inline"/>
 
 Then, let's zoom in to the following code:
 ```csharp
