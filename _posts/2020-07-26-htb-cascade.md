@@ -325,7 +325,7 @@ $ smbclient -L cascade.htb -U s.smith%sT333ve2
 ```
 Great, so an `Audit$` share exists when listing shares ... actually if you recall, we've already seen this earlier. But now that we're `s.smith`, we can enter the share and check it out:
 ```
-smbclient \\\\cascade.htb\\Audit$ -U s.smith%sT333ve2
+$ smbclient \\\\cascade.htb\\Audit$ -U s.smith%sT333ve2
 Try "help" to get a list of possible commands.
 smb: \> dir
   .                                   D        0  Wed Jan 29 10:01:26 2020
