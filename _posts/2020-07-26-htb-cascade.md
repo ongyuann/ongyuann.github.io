@@ -118,7 +118,7 @@ ldapsearch -x -h cascade.htb -s sub -b 'DC=cascade,DC=local' > ldap3
 ```
 Then `grep` the output for key words like `PWD`:
 ```
-less ldap3 | grep Pwd
+$ less ldap3 | grep Pwd
 maxPwdAge: -9223372036854775808
 minPwdAge: 0
 minPwdLength: 5
