@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "IELTS Academic Writing - task 2"
-tag: ielts writing
+tags: ielts writing
 ---
 ```
 Write about the following topic:
