@@ -63,7 +63,7 @@ tags: pt
 1524 - located code for sql sanitization    
 1525 - located code for encryption/decryption    
 1528 - exported code and opened in visual studio, located app properties    
-1530 - used visual studio to search for sql queries: ^.*?sql.*?select    
+1530 - used visual studio to search for sql queries: `^.*?sql.*?select`    
 1538 - logged in to database    
 1538 - listed tables    
 1543 - played around with a feature    
