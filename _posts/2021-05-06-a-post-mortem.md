@@ -35,7 +35,7 @@ tags: pt
 1032 - still trying other vectors    
 1034 - noticed potential rce vector - but probably required admin rights, and i didn't have that yet    
 1036 - still trying other vectors   
-1054 - inserted console debug function into PHP source code, got PHP console debugging online    
+1054 - inserted console debug function into source code, got console debugging online    
 1055 - figured out how the password reset link looked like    
 1058 - confirmed the password reset actually works    
 1115 - went full analysis mode on password reset    
