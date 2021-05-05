@@ -19,7 +19,7 @@ tags: pt
 
 # day one
 ## 1
-0943 - setup mysql logging, noticed collation    
+0943 - setup sql logging, noticed collation    
 0945 - setup fake account, noticed sql query with admin value set to "1" - does that make my new account admin?    
 0946 - discovered database settings file, noticed array holding blacklisted file extensions    
 0947 - discovered database credentials    
@@ -30,11 +30,11 @@ tags: pt
 0956 - analyzed the password reset function generator    
 1008 - looked at user registration    
 1009 - looked at user blockage    
-1010 - queried the SQL backend to see how the reset token looked like    
+1010 - queried the sql backend to see how the reset token looked like    
 1029 - tried attacking other vectors, checked sql logs to see how those other vectors worked (tried to notice sql injection)    
 1032 - still trying other vectors    
 1034 - noticed potential rce vector - but probably required admin rights, and i didn't have that yet    
-1036 - still trying other vectors (SQLi), by this time quite convinced there's no SQLi    
+1036 - still trying other vectors   
 1054 - inserted console debug function into PHP source code, got PHP console debugging online    
 1055 - figured out how the password reset link looked like    
 1058 - confirmed the password reset actually works    
