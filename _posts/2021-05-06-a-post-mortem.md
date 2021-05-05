@@ -5,17 +5,17 @@ tags: pt
 ---
 
 # pre
-0845 - found out my hash didn't work
-0849 - sent an email asking for new hash
-0850 - no reply
-0854 - sent another email asking for new hash
-0900 - tried to login again - hash worked
-0906 - emailed sorry for the multiple sends (and possibly my tone)
-0907 - went through the rites
-0920 - all-ok, set to receive package - didn't see it arrive immediately
-0923 - waited so long i got asked if i'd received it - still hadn't
-0926 - package arrived. did the last few things
-0930 - got the all-clear to start
+0845 - found out my hash didn't work    
+0849 - sent an email asking for new hash    
+0850 - no reply    
+0854 - sent another email asking for new hash    
+0900 - tried to login again - hash worked    
+0906 - emailed sorry for the multiple sends (and possibly my tone)    
+0907 - went through the rites    
+0920 - all-ok, set to receive package - didn't see it arrive immediately    
+0923 - waited so long i got asked if i'd received it - still hadn't    
+0926 - package arrived. did the last few things    
+0930 - got the all-clear to start    
 
 # day one
 ## 1
