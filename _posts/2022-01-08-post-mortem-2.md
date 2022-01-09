@@ -192,7 +192,7 @@ tags: pt
 1547 - had a brainwave - final box couldn't egress out to me, but what if i could dump creds then use creds to ingress into final box instead? started making minidump for lsass dumping  
 1554 - obviously minidump wouldn't work without admin priv - only obvious choice was to choose to use pipepipe to run minidump with system priv, if that would even work - but i had to give it a try  
 1559 - ..and then it actually worked  
-1559 - it actually worked!!!!
+1559 - it actually worked!!!  
 1559 - took another screenshot of spoolsample output just for security  
 1559 - lsass.dmp with 47mb now just sitting on the box - but i couldn't download since it was created by system, and i was just a normal service user  
 1610 - tried using pipepipe to run icacls to change lsass.dmp permissions  
