@@ -5,13 +5,14 @@ tags: pt
 ---
 
 # pre
-0845 - everything worked well
-0900 - received package, did the necessary
-0905 - started
+0845 - everything worked well  
+0900 - received package, did the necessary  
+0905 - started  
 
 # day one
 # flag 1
 0905 - 1100 - everything went wrong. nmap discovered http on only one of the two exposed servers, leading down a completely wrong path, e.g. tried to fit asp, hta, dntjs into an xss vulnerability. also for the first time ever ran sqlmap for this course - had to make sure this was allowed before trying. but nothing worked.  
+
 1100 - guessed port 80 on the other exposed server, and a webpage actually loaded. nmap was bluffing! re-ran nmap on the other server. raged.  
 1101 - immediately discovered the foothold vector on the other exposed server - word document phishing / vba execution.  
 1102 - started using my makemacro.py to make malicious vba - only to discover connecting to the exam vpn completely wrecked the connection between kali and my windows vm. restarted computer twice before i came to this realization. this meant my entire workflow that i had practiced on the for past six months would be completely wrecked once i re-connected to the exam pvn. rekt.  
@@ -159,11 +160,60 @@ tags: pt
 
 0141 - woke up  
 0142 - enumerated database on the box  
-
+  
 0218 - located sqlcmd.exe on the box, continued enumerating database  
+  
+0219 - 0541 - break, back, break, back, break, back..  
+  
+0542 - wondered if final box could use nearby db to tunnel out to me, by setting up chisel link between nearby db and db closest to me  
+0546 - setup chisel links between said dbs - would give up this avenue after thinking twice  
+0554 - tried wpscan - failed
 
-0219 - 0541 - break, back, break, back, break, back..
+0657 - was where i realized i could replace the wp admin user's password hash with my own, so generated a wp hash of "P@ssw0rd"  
+0659 - updated wordpress database with my admin password  
+0702 - hit some snags with powershell special character quirks (the dollar sign)  
+0703 - fix the snag  
+0704 - login as admin worked  
+0708 - saw that i could edit php pages and visit them  
+0708 - at Appearance -> Edit Themes  
+0712 - inserted php webshell code and got code exec  
+0713 - checked spooler service running on the box  
+0719 - but confirmed the box can't reach me  
+0746 - checked out some apparently important wp secret file, but was gibberish  
+0748 - kept at finding any possible secrets  
+0821 - could upload file.txt and certutil -decode successfully via webshell  
+0823 - saw that i could reliably upload files via webshell  
 
-0542 - 
+0824 - 1244 - found no routes into final box, and had convinced myself that webshell was a dead end. heavily considered resigning to fate.    
+
+1245 - went back to enum db more  
+1316 - and enum db more  
+
+1547 - had a brainwave - final box couldn't egress out to me, but what if i could dump creds then use creds to ingress into final box instead? started making minidump for lsass dumping  
+1554 - obviously minidump wouldn't work without admin priv - only obvious choice was to choose to use pipepipe to run minidump with system priv, if that would even work - but i had to give it a try  
+1559 - ..and then it actually worked  
+1559 - it actually worked!!!!
+1559 - took another screenshot of spoolsample output just for security  
+1559 - lsass.dmp with 47mb now just sitting on the box - but i couldn't download since it was created by system, and i was just a normal service user  
+1610 - tried using pipepipe to run icacls to change lsass.dmp permissions  
+1614 - pipepipe ran as intended - but still not enough privs  
+1616 - then another brainwave - why not create local admin user, a la normal service abuse? wrote pipepipe to do this  
+1618 - pipepipe ran as intended  
+1620 - just now was creating jack, now was adding jack to local admin group  
+1621 - ran as intended - and then it didn't work  
+1634 - but then i recalled 5985 on the box, so added jack to remote management users  
+1639 - tested it on devbox and realized cmd prompt absolutely _hates_ with single quotes for strings  
+1643 - pipepipe ran as intended and added jack to remote management users  
+1643 - and then i really could login.  
+1711 - used pipepie to killdef  
+1716 - realized even when logged in as jack with local admin membership, i was still low-priv. very effective uac at work - so again consulted stackoverflow and tried icacls to grant privs on lsass.dmp  
+1735 - was when i finally had the biggest brainwave - write a powershell script as local admin, then simply make pipepipe keep running that script with system privs  
+1737 - worked  
+1755 - made myself RDP into the final box - surreal  
+1755 - captured screenshot of my script just for security   
+1757 - saw secret, but didn't open it since i was on RDP, and that wouldn't count  
+1804 - impacket-psexec into vault01, grabbed secret
+
+
 
 
