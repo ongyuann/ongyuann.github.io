@@ -212,7 +212,7 @@ tags: pt
 1755 - made myself RDP into the final box - surreal  
 1755 - captured screenshot of my script just for security   
 1757 - saw secret, but didn't open it since i was on RDP, and that wouldn't count  
-1804 - impacket-psexec into vault01, grabbed secret
+1804 - impacket-psexec in with admin hash, grabbed secret
 
 
 
