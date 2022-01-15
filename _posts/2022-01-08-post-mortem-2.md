@@ -138,7 +138,7 @@ tags: pt
 2300 - compiled runspace pipepipe  
 2301 - setup first stage of printspoofer by listening with pipepipe  
 2302 - triggered spoolsample to complete second stage of printspoofer, pipepipe executed powershell runner  
-2304 - met called back, killdef
+2304 - met called back, killdef  
 2308 - setup RDP, used first box as jumphost, used mimikatz to pass admin hash and open RDP restrictedadmin  
 2310 - grabbed local (no proof altho admin)  
 
