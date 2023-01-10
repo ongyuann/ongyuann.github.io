@@ -47,7 +47,7 @@ tags: pt
 1220 - testing  
 1228 - testing (and building)  
   
-1239 - this is where i made my first stupid mistake that would cost me 1 hour of pain because there was no way my logic was wrong  
+1239 - is where i made my first stupid mistake - cost me 1 hour of pain because there was no way my logic was wrong  
   
 1243 - found where i made stupid mistake  
 1256 - crisis averted, continued rop chain  
