@@ -118,7 +118,7 @@ tags: pt
 
 2223 - was when i figured i was well and truly fugged. near-zero chance of passing. decided i had to give myself substantial sleep and continue the next day - strategy was now to focus on ch2 instead, then fix ch1 later.
 
-# day 2
+# day two
 ## 2
 0218 - plan failed, woke up in 4 hours instead.
 0218 - ok, first step for ch2 was not impossible. did it.
@@ -174,7 +174,7 @@ tags: pt
 
 2100 - went to sleep happy, with one eye on waking up early to submit my report
 
-# day 3
+# day three
 0549 - woke up. started doing the little things to kill my doubts
 0554 - going well so far
 
