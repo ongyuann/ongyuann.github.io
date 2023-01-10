@@ -116,7 +116,76 @@ tags: pt
 2102 - tracing
 2222 - tracing
 
-2222 - 0218 (next day) - was when i figured i was well and truly fugged. near-zero chance of passing. decided i had to give myself substantial sleep and continue the next day - strategy was now to focus on ch2 instead, then fix ch1 later.
+2223 - was when i figured i was well and truly fugged. near-zero chance of passing. decided i had to give myself substantial sleep and continue the next day - strategy was now to focus on ch2 instead, then fix ch1 later.
 
 # day 2
 ## 2
+0218 - plan failed, woke up in 4 hours instead.
+0218 - ok, first step for ch2 was not impossible. did it.
+0224 - going well
+0225 - that's right
+0227 - uh-huh
+0244 - oh no
+0305 - oh right
+0311 - easy solve
+0336 - hmm..
+
+0337 - ok, brain died. still haven't rested enough - but have some platform to continue with ch2.
+
+0728 - back to work
+0851 - nice, some success
+0929 - i'm such a smartass
+0930 - woot woot
+0942 - let's go
+0946 - that's right
+0946 - ok working. back to it
+1011 - uh-huh.. hmm. google.
+
+1127 - googled idea working well
+1130 - mm-mm
+1226 - booya
+1239 - prep for next step
+1246 - just do it the recommended way instead
+1249 - wowza!! 
+
+1342 - ch2 completed!!! (i have a chance of passing!!!!!)
+1357 - just did it again - it's really working!!!!
+
+# 1
+1409 - back to ch1 - now i just had to get this to work on real box
+1430 - had an idea...(hint: size)...
+1431 - it fugging worked!!!!
+1432 - hostname! whoami!
+1433 - proof! ipconfig!
+1433 - submit hash!!!!
+
+# 3
+1450 - deleted everything since there's no chance i'd complete this anyway now
+
+# 2
+1457 - started collecting screenshots for report
+1458 - collecting
+1459 - feels good
+
+1500 - took a break, told my loved ones i was gonna pass, took a nap, knowing that i just had to write a good report now to bring home the money
+
+2029 - posing for photos
+2042 - still posing
+
+2100 - went to sleep happy, with one eye on waking up early to submit my report
+
+# day 3
+0549 - woke up. started doing the little things to kill my doubts
+0554 - going well so far
+
+0640 - was when i realized my code would be completely rekt if someone just had to run it in a very common circumstance. 
+0743 - fukin squeaky bum time
+0810 - butt squeaking
+0811 - ma's spaghetti
+0812 - feet sweatin
+0846 - fug yea my fix worked
+0907 - yes...
+
+0945 - was gonna continue testing everything to bring home the glory when connection got cut. i'd reached exam end time without knowing.
+
+0950 - submitted report
